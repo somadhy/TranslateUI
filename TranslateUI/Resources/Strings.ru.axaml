@@ -1,0 +1,6 @@
+<ResourceDictionary xmlns="https://github.com/avaloniaui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+  <x:String x:Key="AppTitle">TranslateUI</x:String>
+  <x:String x:Key="WelcomeText">Добро пожаловать в TranslateUI</x:String>
+  <x:String x:Key="TranslateButton">Перевод</x:String>
+</ResourceDictionary>
