@@ -18,7 +18,7 @@ public sealed class DocxFileHandler : IFileHandler
     public Task<string> ExtractTextAsync(string path, CancellationToken cancellationToken = default)
     {
         using var document = WordprocessingDocument.Open(path, false);
-        var body = document.MainDocumentPart?.Document.Body;
+        var body = document.MainDocumentPart?.Document?.Body;
         if (body is null)
         {
             return Task.FromResult(string.Empty);

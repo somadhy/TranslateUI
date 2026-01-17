@@ -15,6 +15,7 @@ public partial class MainWindowViewModel : ViewModelBase
 {
     private readonly ILogger<MainWindowViewModel> _logger;
     private readonly ITranslationService _translationService;
+    private readonly IOllamaClient _ollamaClient;
     private readonly IFileTranslationService _fileTranslationService;
     private readonly IFileDialogService _fileDialogService;
     private readonly ILanguageService _languageService;
@@ -23,6 +24,7 @@ public partial class MainWindowViewModel : ViewModelBase
     public MainWindowViewModel(
         ILogger<MainWindowViewModel> logger,
         ITranslationService translationService,
+        IOllamaClient ollamaClient,
         IFileTranslationService fileTranslationService,
         IFileDialogService fileDialogService,
         ILanguageService languageService,
@@ -30,6 +32,7 @@ public partial class MainWindowViewModel : ViewModelBase
     {
         _logger = logger;
         _translationService = translationService;
+        _ollamaClient = ollamaClient;
         _fileTranslationService = fileTranslationService;
         _fileDialogService = fileDialogService;
         _languageService = languageService;
@@ -39,8 +42,11 @@ public partial class MainWindowViewModel : ViewModelBase
         BrowseInputCommand = new AsyncRelayCommand(BrowseInputAsync, () => !IsBusy);
         BrowseOutputCommand = new AsyncRelayCommand(BrowseOutputAsync, () => !IsBusy);
         OpenOutputCommand = new AsyncRelayCommand(OpenOutputAsync, CanOpenOutput);
+        DownloadModelCommand = new AsyncRelayCommand(DownloadSelectedModelAsync, CanDownloadSelectedModel);
         Languages = _languageService.Languages;
         InitializeLanguages();
+        InitializeModelSelection();
+        _ = RefreshModelAvailabilityAsync();
         _logger.LogDebug("MainWindowViewModel initialized");
     }
 
@@ -53,6 +59,8 @@ public partial class MainWindowViewModel : ViewModelBase
     public IAsyncRelayCommand BrowseOutputCommand { get; }
 
     public IAsyncRelayCommand OpenOutputCommand { get; }
+
+    public IAsyncRelayCommand DownloadModelCommand { get; }
 
     public IReadOnlyList<LanguageInfo> Languages { get; }
 
@@ -87,12 +95,43 @@ public partial class MainWindowViewModel : ViewModelBase
     [ObservableProperty]
     private LanguageInfo? selectedTargetLanguage;
 
+    [ObservableProperty]
+    private int selectedModelIndex;
+
+    [ObservableProperty]
+    private bool isModelAvailabilityKnown;
+
+    [ObservableProperty]
+    private bool isSelectedModelAvailable;
+
+    [ObservableProperty]
+    private double modelDownloadProgress;
+
+    [ObservableProperty]
+    private string? modelDownloadStatus;
+
+    [ObservableProperty]
+    private bool isModelDownloading;
+
+    private readonly string[] _modelOptions =
+    {
+        "translategemma:4b",
+        "translategemma:12b",
+        "translategemma:27b"
+    };
+
+    public string SelectedModelName => GetSelectedModelName();
+
+    public bool IsModelMissing => IsModelAvailabilityKnown && !IsSelectedModelAvailable;
+
     private bool CanTranslate() => !IsBusy && !string.IsNullOrWhiteSpace(SourceText);
 
     private bool CanTranslateFile() =>
         !IsBusy && !string.IsNullOrWhiteSpace(InputFilePath) && !string.IsNullOrWhiteSpace(OutputFilePath);
 
     private bool CanOpenOutput() => !IsBusy && File.Exists(OutputFilePath);
+
+    private bool CanDownloadSelectedModel() => !IsBusy && !IsModelDownloading && IsModelMissing;
 
     private async Task TranslateAsync()
     {
@@ -108,7 +147,7 @@ public partial class MainWindowViewModel : ViewModelBase
                 SourceText,
                 SelectedSourceLanguage?.Code ?? settings.DefaultSourceLang,
                 SelectedTargetLanguage?.Code ?? settings.DefaultTargetLang,
-                settings.DefaultModel);
+                SelectedModelName);
 
             var result = await _translationService.TranslateAsync(request);
             if (result.IsSuccess)
@@ -204,6 +243,47 @@ public partial class MainWindowViewModel : ViewModelBase
         return Task.CompletedTask;
     }
 
+    private async Task DownloadSelectedModelAsync()
+    {
+        ErrorMessageKey = null;
+        StatusMessageKey = null;
+        ModelDownloadProgress = 0;
+        ModelDownloadStatus = null;
+        IsModelDownloading = true;
+        IsBusy = true;
+
+        try
+        {
+            var progress = new Progress<ModelPullProgress>(update =>
+            {
+                if (!string.IsNullOrWhiteSpace(update.Status))
+                {
+                    ModelDownloadStatus = update.Status;
+                }
+
+                if (update.Completed.HasValue && update.Total.HasValue && update.Total.Value > 0)
+                {
+                    ModelDownloadProgress = (double)update.Completed.Value / update.Total.Value * 100d;
+                }
+            });
+
+            await _ollamaClient.PullModelAsync(SelectedModelName, progress);
+            StatusMessageKey = "ModelDownloadSuccess";
+        }
+        catch (Exception ex)
+        {
+            _logger.LogWarning(ex, "Failed to download model");
+            ErrorMessageKey = "ErrorModelDownloadFailed";
+        }
+        finally
+        {
+            IsBusy = false;
+            IsModelDownloading = false;
+        }
+
+        await RefreshModelAvailabilityAsync();
+    }
+
     private static string BuildDefaultOutputPath(string inputPath)
     {
         var directory = Path.GetDirectoryName(inputPath) ?? string.Empty;
@@ -235,6 +315,45 @@ public partial class MainWindowViewModel : ViewModelBase
         }
     }
 
+    private void InitializeModelSelection()
+    {
+        var settings = _settingsService.Current;
+        var index = Array.FindIndex(_modelOptions, model =>
+            string.Equals(model, settings.DefaultModel, StringComparison.OrdinalIgnoreCase));
+        SelectedModelIndex = index >= 0 ? index : 0;
+    }
+
+    private async Task RefreshModelAvailabilityAsync()
+    {
+        IsModelAvailabilityKnown = false;
+
+        try
+        {
+            var tags = await _ollamaClient.GetTagsAsync();
+            var available = new HashSet<string>(tags, StringComparer.OrdinalIgnoreCase);
+            IsModelAvailabilityKnown = true;
+            IsSelectedModelAvailable = available.Contains(SelectedModelName);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogWarning(ex, "Failed to check model availability");
+            IsModelAvailabilityKnown = false;
+            IsSelectedModelAvailable = false;
+            StatusMessageKey = "ModelCheckFailed";
+        }
+    }
+
+    private string GetSelectedModelName()
+    {
+        if (_modelOptions.Length == 0)
+        {
+            return _settingsService.Current.DefaultModel;
+        }
+
+        var index = Math.Clamp(SelectedModelIndex, 0, _modelOptions.Length - 1);
+        return _modelOptions[index];
+    }
+
     partial void OnSourceTextChanged(string value)
     {
         TranslateCommand.NotifyCanExecuteChanged();
@@ -262,6 +381,16 @@ public partial class MainWindowViewModel : ViewModelBase
         _settingsService.Save();
     }
 
+    partial void OnSelectedModelIndexChanged(int value)
+    {
+        var settings = _settingsService.Current;
+        settings.DefaultModel = SelectedModelName;
+        _settingsService.Save();
+        OnPropertyChanged(nameof(SelectedModelName));
+        DownloadModelCommand.NotifyCanExecuteChanged();
+        _ = RefreshModelAvailabilityAsync();
+    }
+
     partial void OnInputFilePathChanged(string value)
     {
         TranslateFileCommand.NotifyCanExecuteChanged();
@@ -280,6 +409,12 @@ public partial class MainWindowViewModel : ViewModelBase
         BrowseInputCommand.NotifyCanExecuteChanged();
         BrowseOutputCommand.NotifyCanExecuteChanged();
         OpenOutputCommand.NotifyCanExecuteChanged();
+        DownloadModelCommand.NotifyCanExecuteChanged();
+    }
+
+    partial void OnIsModelDownloadingChanged(bool value)
+    {
+        DownloadModelCommand.NotifyCanExecuteChanged();
     }
 
     partial void OnErrorMessageKeyChanged(string? value)
@@ -290,5 +425,17 @@ public partial class MainWindowViewModel : ViewModelBase
     partial void OnStatusMessageKeyChanged(string? value)
     {
         OnPropertyChanged(nameof(HasStatus));
+    }
+
+    partial void OnIsModelAvailabilityKnownChanged(bool value)
+    {
+        OnPropertyChanged(nameof(IsModelMissing));
+        DownloadModelCommand.NotifyCanExecuteChanged();
+    }
+
+    partial void OnIsSelectedModelAvailableChanged(bool value)
+    {
+        OnPropertyChanged(nameof(IsModelMissing));
+        DownloadModelCommand.NotifyCanExecuteChanged();
     }
 }

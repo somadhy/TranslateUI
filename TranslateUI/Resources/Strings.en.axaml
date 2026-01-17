@@ -7,6 +7,9 @@
   <x:String x:Key="FileTabHeader">File</x:String>
   <x:String x:Key="SourceLanguageLabel">From</x:String>
   <x:String x:Key="TargetLanguageLabel">To</x:String>
+  <x:String x:Key="ModelLabel">Model</x:String>
+  <x:String x:Key="SpeedLabel">Speed</x:String>
+  <x:String x:Key="AccuracyLabel">Accuracy</x:String>
   <x:String x:Key="SourceTextLabel">Source</x:String>
   <x:String x:Key="ResultTextLabel">Result</x:String>
   <x:String x:Key="SourceTextPlaceholder">Enter text to translate...</x:String>
@@ -16,6 +19,7 @@
   <x:String x:Key="BrowseButton">Browse</x:String>
   <x:String x:Key="TranslateFileButton">Translate file</x:String>
   <x:String x:Key="OpenResultButton">Open result</x:String>
+  <x:String x:Key="DownloadModelButton">Download model</x:String>
   <x:String x:Key="LogLevelLabel">Logging level</x:String>
   <x:String x:Key="SettingsButton">Settings</x:String>
   <x:String x:Key="SettingsTitle">Settings</x:String>
@@ -37,4 +41,9 @@
   <x:String x:Key="ErrorFileTranslationFailed">File translation failed.</x:String>
   <x:String x:Key="FileTranslationSuccess">File translated successfully.</x:String>
   <x:String x:Key="ErrorOutputFileNotFound">Output file not found.</x:String>
+  <x:String x:Key="ModelMissingWarning">Selected model is not available locally.</x:String>
+  <x:String x:Key="ModelDownloadSuccess">Model downloaded successfully.</x:String>
+  <x:String x:Key="ModelCheckFailed">Failed to check model availability.</x:String>
+  <x:String x:Key="ErrorModelDownloadFailed">Failed to download model.</x:String>
+  <x:String x:Key="ModelDownloadProgressLabel">Download progress</x:String>
 </ResourceDictionary>
