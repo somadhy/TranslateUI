@@ -1,9 +1,10 @@
 <Window xmlns="https://github.com/avaloniaui"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:vm="using:TranslateUI.ViewModels"
+        xmlns:conv="using:TranslateUI.Converters"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+        mc:Ignorable="d" d:DesignWidth="900" d:DesignHeight="600"
         x:Class="TranslateUI.Views.MainWindow"
         x:DataType="vm:MainWindowViewModel"
         Icon="/Assets/avalonia-logo.ico"
@@ -15,10 +16,33 @@
         <vm:MainWindowViewModel/>
     </Design.DataContext>
 
-    <Grid RowDefinitions="Auto,*" Margin="16">
-        <StackPanel Spacing="12">
-            <TextBlock Text="{DynamicResource WelcomeText}" FontSize="18" />
-            <Button Content="{DynamicResource SettingsButton}" Width="160" Click="OnOpenSettingsClicked" />
+    <Grid RowDefinitions="Auto,Auto,*" ColumnDefinitions="*,*" Margin="16">
+        <StackPanel Grid.ColumnSpan="2" Orientation="Horizontal" Spacing="12">
+            <Button Content="{DynamicResource TranslateButton}" Command="{Binding TranslateCommand}" Width="140" />
+            <Button Content="{DynamicResource SettingsButton}" Width="140" Click="OnOpenSettingsClicked" />
+        </StackPanel>
+
+        <TextBlock Grid.Row="1"
+                   Grid.ColumnSpan="2"
+                   Text="{Binding ErrorMessageKey, Converter={x:Static conv:ResourceKeyToStringConverter.Instance}}"
+                   Foreground="Tomato"
+                   IsVisible="{Binding HasError}" />
+
+        <StackPanel Grid.Row="2" Grid.Column="0" Spacing="6" Margin="0,8,8,0">
+            <TextBlock Text="{DynamicResource SourceTextLabel}" />
+            <TextBox Text="{Binding SourceText}"
+                     AcceptsReturn="True"
+                     TextWrapping="Wrap"
+                     Watermark="{DynamicResource SourceTextPlaceholder}" />
+        </StackPanel>
+
+        <StackPanel Grid.Row="2" Grid.Column="1" Spacing="6" Margin="8,8,0,0">
+            <TextBlock Text="{DynamicResource ResultTextLabel}" />
+            <TextBox Text="{Binding ResultText}"
+                     AcceptsReturn="True"
+                     TextWrapping="Wrap"
+                     IsReadOnly="True"
+                     Watermark="{DynamicResource ResultTextPlaceholder}" />
         </StackPanel>
     </Grid>
 

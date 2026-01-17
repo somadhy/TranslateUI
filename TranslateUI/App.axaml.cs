@@ -3,6 +3,8 @@ using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Data.Core;
 using Avalonia.Data.Core.Plugins;
 using System.Linq;
+using System;
+using System.Net.Http;
 using Avalonia.Markup.Xaml;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -76,6 +78,14 @@ public partial class App : Application
         services.AddSingleton<ISettingsService, SettingsService>();
         services.AddSingleton<ILocalizationService>(sp =>
             new LocalizationService(this, sp.GetRequiredService<ILogger<LocalizationService>>()));
+        services.AddSingleton(sp => new HttpClient
+        {
+            Timeout = TimeSpan.FromSeconds(120)
+        });
+        services.AddSingleton<ILanguageService, LanguageService>();
+        services.AddSingleton<IPromptBuilder, PromptBuilder>();
+        services.AddSingleton<IOllamaClient, OllamaClient>();
+        services.AddSingleton<ITranslationService, TranslationService>();
         services.AddSingleton<MainWindow>();
         services.AddSingleton<MainWindowViewModel>();
         services.AddSingleton<SettingsWindow>();

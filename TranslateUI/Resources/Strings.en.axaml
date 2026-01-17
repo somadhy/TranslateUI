@@ -3,6 +3,10 @@
   <x:String x:Key="AppTitle">TranslateUI</x:String>
   <x:String x:Key="WelcomeText">Welcome to TranslateUI</x:String>
   <x:String x:Key="TranslateButton">Translate</x:String>
+  <x:String x:Key="SourceTextLabel">Source</x:String>
+  <x:String x:Key="ResultTextLabel">Result</x:String>
+  <x:String x:Key="SourceTextPlaceholder">Enter text to translate...</x:String>
+  <x:String x:Key="ResultTextPlaceholder">Translation will appear here</x:String>
   <x:String x:Key="LogLevelLabel">Logging level</x:String>
   <x:String x:Key="SettingsButton">Settings</x:String>
   <x:String x:Key="SettingsTitle">Settings</x:String>
@@ -12,4 +16,9 @@
   <x:String x:Key="LogLevelWarn">Warn</x:String>
   <x:String x:Key="LogLevelError">Error</x:String>
   <x:String x:Key="LogLevelOff">Off</x:String>
+  <x:String x:Key="ErrorEmptySource">Enter source text before translating.</x:String>
+  <x:String x:Key="ErrorUnknownSourceLanguage">Source language is not supported.</x:String>
+  <x:String x:Key="ErrorUnknownTargetLanguage">Target language is not supported.</x:String>
+  <x:String x:Key="ErrorSameLanguage">Source and target languages must differ.</x:String>
+  <x:String x:Key="ErrorTranslationFailed">Translation failed. Check Ollama connection.</x:String>
 </ResourceDictionary>

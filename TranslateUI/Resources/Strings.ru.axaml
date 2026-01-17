@@ -3,6 +3,10 @@
   <x:String x:Key="AppTitle">TranslateUI</x:String>
   <x:String x:Key="WelcomeText">Добро пожаловать в TranslateUI</x:String>
   <x:String x:Key="TranslateButton">Перевод</x:String>
+  <x:String x:Key="SourceTextLabel">Исходный текст</x:String>
+  <x:String x:Key="ResultTextLabel">Результат</x:String>
+  <x:String x:Key="SourceTextPlaceholder">Введите текст для перевода...</x:String>
+  <x:String x:Key="ResultTextPlaceholder">Здесь появится перевод</x:String>
   <x:String x:Key="LogLevelLabel">Уровень логирования</x:String>
   <x:String x:Key="SettingsButton">Настройки</x:String>
   <x:String x:Key="SettingsTitle">Настройки</x:String>
@@ -12,4 +16,9 @@
   <x:String x:Key="LogLevelWarn">Предупреждения</x:String>
   <x:String x:Key="LogLevelError">Ошибки</x:String>
   <x:String x:Key="LogLevelOff">Выключено</x:String>
+  <x:String x:Key="ErrorEmptySource">Введите исходный текст перед переводом.</x:String>
+  <x:String x:Key="ErrorUnknownSourceLanguage">Исходный язык не поддерживается.</x:String>
+  <x:String x:Key="ErrorUnknownTargetLanguage">Целевой язык не поддерживается.</x:String>
+  <x:String x:Key="ErrorSameLanguage">Исходный и целевой языки должны отличаться.</x:String>
+  <x:String x:Key="ErrorTranslationFailed">Не удалось выполнить перевод. Проверьте соединение с Ollama.</x:String>
 </ResourceDictionary>
