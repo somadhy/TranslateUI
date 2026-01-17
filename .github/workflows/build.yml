@@ -27,15 +27,19 @@ jobs:
           BRANCH="${GITHUB_REF_NAME}"
           if [[ "$BRANCH" == release/v* ]]; then
             VERSION="${BRANCH#release/v}"
+            BASE_VERSION="$VERSION"
           elif [[ "$BRANCH" == "main" ]]; then
-            VERSION="main"
+            VERSION="0.0.0-main"
+            BASE_VERSION="0.0.0"
           elif [[ "$BRANCH" == "dev" ]]; then
-            VERSION="dev"
+            VERSION="0.0.0-dev"
+            BASE_VERSION="0.0.0"
           else
             VERSION="0.0.0-dev"
+            BASE_VERSION="0.0.0"
           fi
           echo "version=$VERSION" >> "$GITHUB_OUTPUT"
-          echo "assembly_version=${VERSION}.0" >> "$GITHUB_OUTPUT"
+          echo "assembly_version=${BASE_VERSION}.0" >> "$GITHUB_OUTPUT"
 
       - name: Build
         run: |
