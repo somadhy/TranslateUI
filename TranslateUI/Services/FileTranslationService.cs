@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.IO.Compression;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
@@ -21,6 +22,8 @@ public interface IFileTranslationService
 public sealed class FileTranslationService : IFileTranslationService
 {
     private const long MaxFileSizeBytes = 50L * 1024 * 1024;
+    private const long MaxArchiveUncompressedBytes = 200L * 1024 * 1024;
+    private const int MaxArchiveCompressionRatio = 100;
     private readonly IEnumerable<IFileHandler> _handlers;
     private readonly ITranslationService _translationService;
     private readonly ISettingsService _settingsService;
@@ -50,12 +53,18 @@ public sealed class FileTranslationService : IFileTranslationService
             return FileTranslationResult.Failure("ErrorFileNotSelected");
         }
 
-        if (!File.Exists(inputPath))
+        if (!Path.IsPathRooted(inputPath))
+        {
+            return FileTranslationResult.Failure("ErrorInvalidPath");
+        }
+
+        var normalizedInputPath = Path.GetFullPath(inputPath);
+        if (!File.Exists(normalizedInputPath))
         {
             return FileTranslationResult.Failure("ErrorFileNotFound");
         }
 
-        var fileInfo = new FileInfo(inputPath);
+        var fileInfo = new FileInfo(normalizedInputPath);
         if (fileInfo.Length > MaxFileSizeBytes)
         {
             return FileTranslationResult.Failure("ErrorFileTooLarge");
@@ -66,7 +75,51 @@ public sealed class FileTranslationService : IFileTranslationService
             return FileTranslationResult.Failure("ErrorOutputNotSelected");
         }
 
-        var extension = Path.GetExtension(inputPath);
+        if (!Path.IsPathRooted(outputPath))
+        {
+            return FileTranslationResult.Failure("ErrorInvalidPath");
+        }
+
+        var normalizedOutputPath = Path.GetFullPath(outputPath);
+        var outputDirectory = Path.GetDirectoryName(normalizedOutputPath);
+        if (string.IsNullOrWhiteSpace(outputDirectory))
+        {
+            return FileTranslationResult.Failure("ErrorInvalidPath");
+        }
+
+        try
+        {
+            Directory.CreateDirectory(outputDirectory);
+        }
+        catch (UnauthorizedAccessException)
+        {
+            return FileTranslationResult.Failure("ErrorFileAccessDenied");
+        }
+
+        try
+        {
+            using var _ = File.Open(normalizedInputPath, FileMode.Open, FileAccess.Read, FileShare.Read);
+        }
+        catch (UnauthorizedAccessException)
+        {
+            return FileTranslationResult.Failure("ErrorFileAccessDenied");
+        }
+
+        try
+        {
+            using var _ = File.Open(normalizedOutputPath, FileMode.OpenOrCreate, FileAccess.Write, FileShare.None);
+        }
+        catch (UnauthorizedAccessException)
+        {
+            return FileTranslationResult.Failure("ErrorFileAccessDenied");
+        }
+
+        var extension = Path.GetExtension(normalizedInputPath);
+        if (IsArchiveExtension(extension) && !IsArchiveSafe(normalizedInputPath))
+        {
+            return FileTranslationResult.Failure("ErrorFileUnsafe");
+        }
+
         var handler = FindHandler(extension);
         if (handler is null)
         {
@@ -75,7 +128,7 @@ public sealed class FileTranslationService : IFileTranslationService
 
         try
         {
-            var sourceText = await handler.ExtractTextAsync(inputPath, cancellationToken);
+            var sourceText = await handler.ExtractTextAsync(normalizedInputPath, cancellationToken);
             var settings = _settingsService.Current;
             var request = new TranslationRequest(
                 sourceText,
@@ -90,9 +143,9 @@ public sealed class FileTranslationService : IFileTranslationService
             }
 
             var finalPath = await handler.BuildOutputAsync(
-                inputPath,
+                normalizedInputPath,
                 result.Text,
-                outputPath,
+                normalizedOutputPath,
                 cancellationToken);
 
             return FileTranslationResult.Success(finalPath);
@@ -115,5 +168,47 @@ public sealed class FileTranslationService : IFileTranslationService
         }
 
         return null;
+    }
+
+    private static bool IsArchiveExtension(string extension) =>
+        extension.Equals(".docx", StringComparison.OrdinalIgnoreCase) ||
+        extension.Equals(".odt", StringComparison.OrdinalIgnoreCase);
+
+    private static bool IsArchiveSafe(string path)
+    {
+        try
+        {
+            using var archive = ZipFile.OpenRead(path);
+            long totalUncompressed = 0;
+            long totalCompressed = 0;
+
+            foreach (var entry in archive.Entries)
+            {
+                totalUncompressed += entry.Length;
+                totalCompressed += entry.CompressedLength;
+
+                if (totalUncompressed > MaxArchiveUncompressedBytes)
+                {
+                    return false;
+                }
+            }
+
+            if (totalCompressed <= 0)
+            {
+                return true;
+            }
+
+            var ratio = totalUncompressed / totalCompressed;
+            if (ratio <= MaxArchiveCompressionRatio)
+            {
+                return true;
+            }
+
+            return totalUncompressed <= MaxArchiveUncompressedBytes / 4;
+        }
+        catch
+        {
+            return false;
+        }
     }
 }

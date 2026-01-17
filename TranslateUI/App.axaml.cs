@@ -1,6 +1,8 @@
 using System;
 using System.Linq;
+using System.IO.Pipes;
 using System.Net.Http;
+using System.Threading;
 using System.Threading.Tasks;
 using Avalonia;
 using Avalonia.Controls;
@@ -9,6 +11,7 @@ using Avalonia.Data.Core;
 using Avalonia.Data.Core.Plugins;
 using Avalonia.Markup.Xaml;
 using Avalonia.Platform;
+using Avalonia.Threading;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Serilog.Extensions.Logging;
@@ -23,6 +26,8 @@ public partial class App : Application
     public static ServiceProvider Services { get; private set; } = null!;
     private TrayIcon? _trayIcon;
     private bool _isExitRequested;
+    private CancellationTokenSource? _activationCts;
+    private ILogger<App>? _logger;
 
     public override void Initialize()
     {
@@ -39,6 +44,7 @@ public partial class App : Application
 
             Services = ConfigureServices();
             var logger = Services.GetRequiredService<ILogger<App>>();
+            _logger = logger;
             var settingsService = Services.GetRequiredService<ISettingsService>();
             var loggingService = Services.GetRequiredService<ILoggingService>();
             var settings = settingsService.Load();
@@ -55,6 +61,7 @@ public partial class App : Application
             desktop.MainWindow = mainWindow;
 
             InitializeTray(desktop, mainWindow);
+            StartActivationListener(mainWindow);
         }
 
         base.OnFrameworkInitializationCompleted();
@@ -94,6 +101,7 @@ public partial class App : Application
         {
             if (_isExitRequested)
             {
+                _activationCts?.Cancel();
                 return;
             }
 
@@ -102,7 +110,7 @@ public partial class App : Application
         };
     }
 
-    private static void ShowMainWindow(Window mainWindow)
+    internal static void ShowMainWindow(Window mainWindow)
     {
         if (!mainWindow.IsVisible)
         {
@@ -128,6 +136,44 @@ public partial class App : Application
         {
             viewModel.TranslateCommand.Execute(null);
         }
+    }
+
+    private void StartActivationListener(Window mainWindow)
+    {
+        _activationCts = new CancellationTokenSource();
+        var token = _activationCts.Token;
+
+        _ = Task.Run(async () =>
+        {
+            while (!token.IsCancellationRequested)
+            {
+                try
+                {
+                    await using var server = new NamedPipeServerStream(
+                        "TranslateUI.Activate",
+                        PipeDirection.In,
+                        1,
+                        PipeTransmissionMode.Byte,
+                        PipeOptions.Asynchronous);
+
+                    await server.WaitForConnectionAsync(token);
+                    if (token.IsCancellationRequested)
+                    {
+                        break;
+                    }
+
+                    Dispatcher.UIThread.Post(() => ShowMainWindow(mainWindow));
+                }
+                catch (OperationCanceledException)
+                {
+                    break;
+                }
+                catch (Exception ex)
+                {
+                    _logger?.LogWarning(ex, "Activation listener failed");
+                }
+            }
+        }, token);
     }
 
     private void DisableAvaloniaDataAnnotationValidation()

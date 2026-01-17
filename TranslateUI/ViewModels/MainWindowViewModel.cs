@@ -650,7 +650,7 @@ public partial class MainWindowViewModel : ViewModelBase
             IsModelAvailabilityKnown = false;
             IsSelectedModelAvailable = false;
             IsVisionSupported = false;
-            StatusMessageKey = "ModelCheckFailed";
+            StatusMessageKey = "OllamaUnavailable";
         }
     }
 

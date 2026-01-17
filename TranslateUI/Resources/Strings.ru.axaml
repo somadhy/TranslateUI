@@ -57,6 +57,9 @@
   <x:String x:Key="ErrorFileNotSelected">Выберите файл для перевода.</x:String>
   <x:String x:Key="ErrorOutputNotSelected">Выберите путь сохранения результата.</x:String>
   <x:String x:Key="ErrorFileNotFound">Исходный файл не найден.</x:String>
+  <x:String x:Key="ErrorInvalidPath">Некорректный или недопустимый путь.</x:String>
+  <x:String x:Key="ErrorFileAccessDenied">Нет доступа к файлу.</x:String>
+  <x:String x:Key="ErrorFileUnsafe">Файл небезопасен для обработки.</x:String>
   <x:String x:Key="ErrorFileTooLarge">Файл слишком большой для обработки.</x:String>
   <x:String x:Key="ErrorFileUnsupported">Формат файла не поддерживается.</x:String>
   <x:String x:Key="ErrorFileTranslationFailed">Не удалось перевести файл.</x:String>
@@ -74,6 +77,7 @@
   <x:String x:Key="ModelMissingWarning">Выбранной модели нет локально.</x:String>
   <x:String x:Key="ModelDownloadSuccess">Модель успешно скачана.</x:String>
   <x:String x:Key="ModelCheckFailed">Не удалось проверить наличие моделей.</x:String>
+  <x:String x:Key="OllamaUnavailable">Ollama недоступна. Проверьте адрес и соединение.</x:String>
   <x:String x:Key="ErrorModelDownloadFailed">Не удалось скачать модель.</x:String>
   <x:String x:Key="ModelDownloadProgressLabel">Прогресс скачивания</x:String>
   <x:String x:Key="TooltipSettings">Открыть настройки</x:String>

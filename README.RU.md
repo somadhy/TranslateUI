@@ -27,16 +27,16 @@
 - Тесты: `dotnet test TranslateUI.Tests/TranslateUI.Tests.csproj`
 
 ## Карта документации
-- `a1/docs/01-Requirements.md` — функциональные и нефункциональные требования
-- `a1/docs/02-Architecture.md` — архитектура MVVM и слои
-- `a1/docs/03-UI-UX.md` — интерфейс, макеты, tray
-- `a1/docs/04-Ollama-Integration.md` — HTTP-интеграция и модели
-- `a1/docs/05-File-Formats.md` — обработка форматов и стратегии
-- `a1/docs/06-Prompting-Languages.md` — промпты и список языков
-- `a1/docs/07-Settings-Localization.md` — настройки и локализация
-- `a1/docs/08-Testing.md` — тестирование
-- `a1/docs/09-Security.md` — безопасность
-- `a1/docs/10-Implementation-Plan.md` — план реализации
+- `docs/01-Requirements.md` — функциональные и нефункциональные требования
+- `docs/02-Architecture.md` — архитектура MVVM и слои
+- `docs/03-UI-UX.md` — интерфейс, макеты, tray
+- `docs/04-Ollama-Integration.md` — HTTP-интеграция и модели
+- `docs/05-File-Formats.md` — обработка форматов и стратегии
+- `docs/06-Prompting-Languages.md` — промпты и список языков
+- `docs/07-Settings-Localization.md` — настройки и локализация
+- `docs/08-Testing.md` — тестирование
+- `docs/09-Security.md` — безопасность
+- `docs/10-Implementation-Plan.md` — план реализации
 
 ## Лицензирование
 Использовать только бесплатные и открытые библиотеки.

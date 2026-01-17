@@ -33,16 +33,16 @@ Target stack: **.NET 10**, **C# 14**, **Avalonia UI**, **MVVM**. No paid librari
 - Test: `dotnet test TranslateUI.Tests/TranslateUI.Tests.csproj`
 
 ## Documentation Map
-- `a1/docs/01-Requirements.md` — functional and non-functional requirements
-- `a1/docs/02-Architecture.md` — MVVM structure, services, patterns
-- `a1/docs/03-UI-UX.md` — layouts, interactions, tray behavior
-- `a1/docs/04-Ollama-Integration.md` — HTTP endpoints, model handling
-- `a1/docs/05-File-Formats.md` — extraction/output strategies
-- `a1/docs/06-Prompting-Languages.md` — prompt format + language list usage
-- `a1/docs/07-Settings-Localization.md` — settings and resources
-- `a1/docs/08-Testing.md` — unit/integration/UI test guidance
-- `a1/docs/09-Security.md` — security and safety checklist
-- `a1/docs/10-Implementation-Plan.md` — phased delivery plan
+- `docs/01-Requirements.md` — functional and non-functional requirements
+- `docs/02-Architecture.md` — MVVM structure, services, patterns
+- `docs/03-UI-UX.md` — layouts, interactions, tray behavior
+- `docs/04-Ollama-Integration.md` — HTTP endpoints, model handling
+- `docs/05-File-Formats.md` — extraction/output strategies
+- `docs/06-Prompting-Languages.md` — prompt format + language list usage
+- `docs/07-Settings-Localization.md` — settings and resources
+- `docs/08-Testing.md` — unit/integration/UI test guidance
+- `docs/09-Security.md` — security and safety checklist
+- `docs/10-Implementation-Plan.md` — phased delivery plan
 
 ## Licensing
 Use only free/open-source libraries.

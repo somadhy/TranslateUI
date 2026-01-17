@@ -57,6 +57,9 @@
   <x:String x:Key="ErrorFileNotSelected">Select a file to translate.</x:String>
   <x:String x:Key="ErrorOutputNotSelected">Select a destination for the result.</x:String>
   <x:String x:Key="ErrorFileNotFound">Input file not found.</x:String>
+  <x:String x:Key="ErrorInvalidPath">Path is invalid or not allowed.</x:String>
+  <x:String x:Key="ErrorFileAccessDenied">Access to file was denied.</x:String>
+  <x:String x:Key="ErrorFileUnsafe">File looks unsafe to process.</x:String>
   <x:String x:Key="ErrorFileTooLarge">File is too large to process.</x:String>
   <x:String x:Key="ErrorFileUnsupported">File format is not supported.</x:String>
   <x:String x:Key="ErrorFileTranslationFailed">File translation failed.</x:String>
@@ -74,6 +77,7 @@
   <x:String x:Key="ModelMissingWarning">Selected model is not available locally.</x:String>
   <x:String x:Key="ModelDownloadSuccess">Model downloaded successfully.</x:String>
   <x:String x:Key="ModelCheckFailed">Failed to check model availability.</x:String>
+  <x:String x:Key="OllamaUnavailable">Ollama is not available. Check URL and connection.</x:String>
   <x:String x:Key="ErrorModelDownloadFailed">Failed to download model.</x:String>
   <x:String x:Key="ModelDownloadProgressLabel">Download progress</x:String>
   <x:String x:Key="TooltipSettings">Open settings</x:String>

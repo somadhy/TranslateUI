@@ -47,18 +47,24 @@ public sealed class ImageTranslationService : IImageTranslationService
             return TranslationResult.Failure("ErrorImageNotSelected");
         }
 
-        if (!File.Exists(imagePath))
+        if (!Path.IsPathRooted(imagePath))
+        {
+            return TranslationResult.Failure("ErrorInvalidPath");
+        }
+
+        var normalizedPath = Path.GetFullPath(imagePath);
+        if (!File.Exists(normalizedPath))
         {
             return TranslationResult.Failure("ErrorImageNotFound");
         }
 
-        var extension = Path.GetExtension(imagePath);
+        var extension = Path.GetExtension(normalizedPath);
         if (!IsSupportedExtension(extension))
         {
             return TranslationResult.Failure("ErrorFileUnsupported");
         }
 
-        var info = new FileInfo(imagePath);
+        var info = new FileInfo(normalizedPath);
         if (info.Length > MaxImageSizeBytes)
         {
             return TranslationResult.Failure("ErrorFileTooLarge");
@@ -86,7 +92,16 @@ public sealed class ImageTranslationService : IImageTranslationService
 
         try
         {
-            var bytes = await File.ReadAllBytesAsync(imagePath, cancellationToken);
+            try
+            {
+                using var _ = File.Open(normalizedPath, FileMode.Open, FileAccess.Read, FileShare.Read);
+            }
+            catch (UnauthorizedAccessException)
+            {
+                return TranslationResult.Failure("ErrorFileAccessDenied");
+            }
+
+            var bytes = await File.ReadAllBytesAsync(normalizedPath, cancellationToken);
             var base64 = Convert.ToBase64String(bytes);
             var translated = await _ollamaClient.GenerateWithImagesAsync(
                 model,
