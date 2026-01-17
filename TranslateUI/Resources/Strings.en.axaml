@@ -13,6 +13,7 @@
   <x:String x:Key="SourceTextLabel">Source</x:String>
   <x:String x:Key="ResultTextLabel">Result</x:String>
   <x:String x:Key="SourceTextPlaceholder">Enter text to translate...</x:String>
+  <x:String x:Key="TranslateShortcutHint">Translate: Ctrl+Enter or Cmd+Enter</x:String>
   <x:String x:Key="ResultTextPlaceholder">Translation will appear here</x:String>
   <x:String x:Key="InputFileLabel">Input file</x:String>
   <x:String x:Key="OutputFileLabel">Output path</x:String>
@@ -46,4 +47,20 @@
   <x:String x:Key="ModelCheckFailed">Failed to check model availability.</x:String>
   <x:String x:Key="ErrorModelDownloadFailed">Failed to download model.</x:String>
   <x:String x:Key="ModelDownloadProgressLabel">Download progress</x:String>
+  <x:String x:Key="TooltipSettings">Open settings</x:String>
+  <x:String x:Key="TooltipSourceLanguage">Select source language</x:String>
+  <x:String x:Key="TooltipTargetLanguage">Select target language</x:String>
+  <x:String x:Key="TooltipModelSlider">Choose 4B/12B/27B model</x:String>
+  <x:String x:Key="TooltipDownloadModel">Download selected model</x:String>
+  <x:String x:Key="TooltipSourceText">Source text (Ctrl+Enter or Cmd+Enter to translate)</x:String>
+  <x:String x:Key="TooltipResultText">Translation result</x:String>
+  <x:String x:Key="TooltipTranslateButton">Translate (Ctrl+Enter or Cmd+Enter)</x:String>
+  <x:String x:Key="TooltipTextTab">Text translation</x:String>
+  <x:String x:Key="TooltipFileTab">File translation</x:String>
+  <x:String x:Key="TooltipInputFile">Selected input file</x:String>
+  <x:String x:Key="TooltipBrowseInput">Choose input file</x:String>
+  <x:String x:Key="TooltipOutputFile">Output path</x:String>
+  <x:String x:Key="TooltipBrowseOutput">Choose output path</x:String>
+  <x:String x:Key="TooltipTranslateFile">Translate selected file</x:String>
+  <x:String x:Key="TooltipOpenResult">Open translated file</x:String>
 </ResourceDictionary>

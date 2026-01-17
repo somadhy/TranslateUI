@@ -20,13 +20,17 @@
         <Grid ColumnDefinitions="Auto,Auto,Auto,*" ColumnSpacing="16">
             <Button Content="{DynamicResource SettingsButton}"
                     Width="140"
+                    ToolTip.Tip="{DynamicResource TooltipSettings}"
                     Click="OnOpenSettingsClicked" />
 
             <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
-                <TextBlock Text="{DynamicResource SourceLanguageLabel}" VerticalAlignment="Center" />
+                <TextBlock Text="{DynamicResource SourceLanguageLabel}"
+                           VerticalAlignment="Center"
+                           ToolTip.Tip="{DynamicResource TooltipSourceLanguage}" />
                 <ComboBox ItemsSource="{Binding Languages}"
                           SelectedItem="{Binding SelectedSourceLanguage}"
-                          Width="200">
+                          Width="200"
+                          ToolTip.Tip="{DynamicResource TooltipSourceLanguage}">
                     <ComboBox.ItemTemplate>
                         <DataTemplate>
                             <TextBlock Text="{Binding DisplayName}" />
@@ -36,10 +40,13 @@
             </StackPanel>
 
             <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
-                <TextBlock Text="{DynamicResource TargetLanguageLabel}" VerticalAlignment="Center" />
+                <TextBlock Text="{DynamicResource TargetLanguageLabel}"
+                           VerticalAlignment="Center"
+                           ToolTip.Tip="{DynamicResource TooltipTargetLanguage}" />
                 <ComboBox ItemsSource="{Binding Languages}"
                           SelectedItem="{Binding SelectedTargetLanguage}"
-                          Width="200">
+                          Width="200"
+                          ToolTip.Tip="{DynamicResource TooltipTargetLanguage}">
                     <ComboBox.ItemTemplate>
                         <DataTemplate>
                             <TextBlock Text="{Binding DisplayName}" />
@@ -49,25 +56,36 @@
             </StackPanel>
 
             <StackPanel Grid.Column="3" Spacing="6">
-                <TextBlock Text="{DynamicResource ModelLabel}" />
+                <TextBlock Text="{DynamicResource ModelLabel}"
+                           ToolTip.Tip="{DynamicResource TooltipModelSlider}" />
                 <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="8">
-                    <TextBlock Text="{DynamicResource SpeedLabel}" VerticalAlignment="Center" />
+                    <TextBlock Text="{DynamicResource SpeedLabel}"
+                               VerticalAlignment="Center"
+                               ToolTip.Tip="{DynamicResource TooltipModelSlider}" />
                     <Slider Grid.Column="1"
                             Minimum="0"
                             Maximum="2"
                             TickFrequency="1"
                             IsSnapToTickEnabled="True"
-                            Value="{Binding SelectedModelIndex}" />
-                    <TextBlock Grid.Column="2" Text="{DynamicResource AccuracyLabel}" VerticalAlignment="Center" />
+                            Value="{Binding SelectedModelIndex}"
+                            ToolTip.Tip="{DynamicResource TooltipModelSlider}" />
+                    <TextBlock Grid.Column="2"
+                               Text="{DynamicResource AccuracyLabel}"
+                               VerticalAlignment="Center"
+                               ToolTip.Tip="{DynamicResource TooltipModelSlider}" />
                 </Grid>
                 <StackPanel Orientation="Horizontal" Spacing="8">
-                    <TextBlock Text="{Binding SelectedModelName}" VerticalAlignment="Center" />
+                    <TextBlock Text="{Binding SelectedModelName}"
+                               VerticalAlignment="Center"
+                               ToolTip.Tip="{DynamicResource TooltipModelSlider}" />
                     <Button Content="{DynamicResource DownloadModelButton}"
                             Width="160"
-                            Command="{Binding DownloadModelCommand}" />
+                            Command="{Binding DownloadModelCommand}"
+                            ToolTip.Tip="{DynamicResource TooltipDownloadModel}" />
                 </StackPanel>
                 <StackPanel Spacing="4" IsVisible="{Binding IsModelDownloading}">
-                    <TextBlock Text="{DynamicResource ModelDownloadProgressLabel}" />
+                    <TextBlock Text="{DynamicResource ModelDownloadProgressLabel}"
+                               ToolTip.Tip="{DynamicResource TooltipDownloadModel}" />
                     <TextBlock Text="{Binding ModelDownloadStatus}" />
                     <ProgressBar Minimum="0"
                                  Maximum="100"
@@ -89,57 +107,90 @@
         </StackPanel>
 
         <TabControl Grid.Row="2">
-            <TabItem Header="{DynamicResource TextTabHeader}">
-                <Grid RowDefinitions="Auto,*" ColumnDefinitions="*,*">
-                    <StackPanel Grid.ColumnSpan="2" Orientation="Horizontal" Spacing="12">
-                        <Button Content="{DynamicResource TranslateButton}" Command="{Binding TranslateCommand}" Width="140" />
-                    </StackPanel>
+            <TabItem Header="{DynamicResource TextTabHeader}"
+                     ToolTip.Tip="{DynamicResource TooltipTextTab}">
+                <Grid RowDefinitions="Auto,*" ColumnDefinitions="*,*" ColumnSpacing="16" RowSpacing="8">
+                    <TextBlock Grid.Row="0"
+                               Grid.Column="0"
+                               Text="{DynamicResource SourceTextLabel}"
+                               ToolTip.Tip="{DynamicResource TooltipSourceText}" />
+                    <TextBlock Grid.Row="0"
+                               Grid.Column="1"
+                               Text="{DynamicResource ResultTextLabel}"
+                               ToolTip.Tip="{DynamicResource TooltipResultText}" />
 
-                    <StackPanel Grid.Row="1" Grid.Column="0" Spacing="6" Margin="0,8,8,0">
-                        <TextBlock Text="{DynamicResource SourceTextLabel}" />
+                    <Grid Grid.Row="1" Grid.Column="0">
                         <TextBox Text="{Binding SourceText}"
                                  AcceptsReturn="True"
                                  TextWrapping="Wrap"
-                                 Watermark="{DynamicResource SourceTextPlaceholder}" />
-                    </StackPanel>
+                                 VerticalAlignment="Stretch"
+                                 ToolTip.Tip="{DynamicResource TooltipSourceText}"
+                                 Watermark="{DynamicResource SourceTextPlaceholder}">
+                            <TextBox.KeyBindings>
+                                <KeyBinding Gesture="Ctrl+Enter" Command="{Binding TranslateCommand}" />
+                                <KeyBinding Gesture="Cmd+Enter" Command="{Binding TranslateCommand}" />
+                            </TextBox.KeyBindings>
+                        </TextBox>
+                        <Button Content=">"
+                                Width="36"
+                                Height="32"
+                                HorizontalAlignment="Right"
+                                VerticalAlignment="Bottom"
+                                Margin="8"
+                                Command="{Binding TranslateCommand}"
+                                ToolTip.Tip="{DynamicResource TooltipTranslateButton}" />
+                    </Grid>
 
-                    <StackPanel Grid.Row="1" Grid.Column="1" Spacing="6" Margin="8,8,0,0">
-                        <TextBlock Text="{DynamicResource ResultTextLabel}" />
-                        <TextBox Text="{Binding ResultText}"
-                                 AcceptsReturn="True"
-                                 TextWrapping="Wrap"
-                                 IsReadOnly="True"
-                                 Watermark="{DynamicResource ResultTextPlaceholder}" />
-                    </StackPanel>
+                    <TextBox Grid.Row="1"
+                             Grid.Column="1"
+                             Text="{Binding ResultText}"
+                             AcceptsReturn="True"
+                             TextWrapping="Wrap"
+                             VerticalAlignment="Stretch"
+                             IsReadOnly="True"
+                             ToolTip.Tip="{DynamicResource TooltipResultText}"
+                             Watermark="{DynamicResource ResultTextPlaceholder}" />
                 </Grid>
             </TabItem>
 
-            <TabItem Header="{DynamicResource FileTabHeader}">
+            <TabItem Header="{DynamicResource FileTabHeader}"
+                     ToolTip.Tip="{DynamicResource TooltipFileTab}">
                 <Grid RowDefinitions="Auto,Auto,Auto" ColumnDefinitions="Auto,*,Auto" ColumnSpacing="8" RowSpacing="8">
-                    <TextBlock Text="{DynamicResource InputFileLabel}" VerticalAlignment="Center" />
+                    <TextBlock Text="{DynamicResource InputFileLabel}"
+                               VerticalAlignment="Center"
+                               ToolTip.Tip="{DynamicResource TooltipInputFile}" />
                     <TextBox Grid.Column="1"
                              Text="{Binding InputFilePath}"
-                             IsReadOnly="True" />
+                             IsReadOnly="True"
+                             ToolTip.Tip="{DynamicResource TooltipInputFile}" />
                     <Button Grid.Column="2"
                             Content="{DynamicResource BrowseButton}"
-                            Command="{Binding BrowseInputCommand}" />
+                            Command="{Binding BrowseInputCommand}"
+                            ToolTip.Tip="{DynamicResource TooltipBrowseInput}" />
 
-                    <TextBlock Grid.Row="1" Text="{DynamicResource OutputFileLabel}" VerticalAlignment="Center" />
+                    <TextBlock Grid.Row="1"
+                               Text="{DynamicResource OutputFileLabel}"
+                               VerticalAlignment="Center"
+                               ToolTip.Tip="{DynamicResource TooltipOutputFile}" />
                     <TextBox Grid.Row="1"
                              Grid.Column="1"
-                             Text="{Binding OutputFilePath}" />
+                             Text="{Binding OutputFilePath}"
+                             ToolTip.Tip="{DynamicResource TooltipOutputFile}" />
                     <Button Grid.Row="1"
                             Grid.Column="2"
                             Content="{DynamicResource BrowseButton}"
-                            Command="{Binding BrowseOutputCommand}" />
+                            Command="{Binding BrowseOutputCommand}"
+                            ToolTip.Tip="{DynamicResource TooltipBrowseOutput}" />
 
                     <StackPanel Grid.Row="2" Grid.Column="1" Orientation="Horizontal" Spacing="8">
                         <Button Content="{DynamicResource TranslateFileButton}"
                                 Width="180"
-                                Command="{Binding TranslateFileCommand}" />
+                                Command="{Binding TranslateFileCommand}"
+                                ToolTip.Tip="{DynamicResource TooltipTranslateFile}" />
                         <Button Content="{DynamicResource OpenResultButton}"
                                 Width="140"
-                                Command="{Binding OpenOutputCommand}" />
+                                Command="{Binding OpenOutputCommand}"
+                                ToolTip.Tip="{DynamicResource TooltipOpenResult}" />
                     </StackPanel>
                 </Grid>
             </TabItem>

@@ -13,6 +13,7 @@
   <x:String x:Key="SourceTextLabel">Исходный текст</x:String>
   <x:String x:Key="ResultTextLabel">Результат</x:String>
   <x:String x:Key="SourceTextPlaceholder">Введите текст для перевода...</x:String>
+  <x:String x:Key="TranslateShortcutHint">Перевод: Ctrl+Enter или Cmd+Enter</x:String>
   <x:String x:Key="ResultTextPlaceholder">Здесь появится перевод</x:String>
   <x:String x:Key="InputFileLabel">Исходный файл</x:String>
   <x:String x:Key="OutputFileLabel">Путь результата</x:String>
@@ -46,4 +47,20 @@
   <x:String x:Key="ModelCheckFailed">Не удалось проверить наличие моделей.</x:String>
   <x:String x:Key="ErrorModelDownloadFailed">Не удалось скачать модель.</x:String>
   <x:String x:Key="ModelDownloadProgressLabel">Прогресс скачивания</x:String>
+  <x:String x:Key="TooltipSettings">Открыть настройки</x:String>
+  <x:String x:Key="TooltipSourceLanguage">Выбрать язык источника</x:String>
+  <x:String x:Key="TooltipTargetLanguage">Выбрать целевой язык</x:String>
+  <x:String x:Key="TooltipModelSlider">Выбор модели 4B/12B/27B</x:String>
+  <x:String x:Key="TooltipDownloadModel">Скачать выбранную модель</x:String>
+  <x:String x:Key="TooltipSourceText">Исходный текст (Ctrl+Enter или Cmd+Enter для перевода)</x:String>
+  <x:String x:Key="TooltipResultText">Результат перевода</x:String>
+  <x:String x:Key="TooltipTranslateButton">Перевести (Ctrl+Enter или Cmd+Enter)</x:String>
+  <x:String x:Key="TooltipTextTab">Перевод текста</x:String>
+  <x:String x:Key="TooltipFileTab">Перевод файлов</x:String>
+  <x:String x:Key="TooltipInputFile">Выбранный файл</x:String>
+  <x:String x:Key="TooltipBrowseInput">Выбрать файл</x:String>
+  <x:String x:Key="TooltipOutputFile">Путь результата</x:String>
+  <x:String x:Key="TooltipBrowseOutput">Выбрать путь сохранения</x:String>
+  <x:String x:Key="TooltipTranslateFile">Перевести файл</x:String>
+  <x:String x:Key="TooltipOpenResult">Открыть результат</x:String>
 </ResourceDictionary>
