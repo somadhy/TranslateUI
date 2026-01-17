@@ -198,8 +198,8 @@ public partial class App : Application
         services.AddSingleton<IImageTranslationService, ImageTranslationService>();
         services.AddSingleton<MainWindow>();
         services.AddSingleton<MainWindowViewModel>();
-        services.AddSingleton<SettingsWindow>();
-        services.AddSingleton<SettingsWindowViewModel>();
+        services.AddTransient<SettingsWindow>();
+        services.AddTransient<SettingsWindowViewModel>();
         return services.BuildServiceProvider();
     }
 }
