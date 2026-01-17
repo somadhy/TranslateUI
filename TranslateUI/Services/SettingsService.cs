@@ -25,13 +25,15 @@ public sealed class SettingsService : ISettingsService
         Converters = { new JsonStringEnumConverter() }
     };
 
-    public SettingsService(ILogger<SettingsService> logger)
+    public SettingsService(ILogger<SettingsService> logger, string? settingsPath = null)
     {
         _logger = logger;
-        _settingsPath = Path.Combine(
-            Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
-            "TranslateUI",
-            "settings.json");
+        _settingsPath = string.IsNullOrWhiteSpace(settingsPath)
+            ? Path.Combine(
+                Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
+                "TranslateUI",
+                "settings.json")
+            : settingsPath;
     }
 
     public AppSettings Current { get; private set; } = new();

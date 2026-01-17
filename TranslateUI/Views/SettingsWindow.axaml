@@ -12,14 +12,55 @@
             <StackPanel Spacing="6">
                 <TextBlock Text="{DynamicResource InterfaceSectionTitle}" FontWeight="SemiBold" />
                 <Border BorderThickness="1" BorderBrush="#333333" Padding="8">
-                    <TextBlock Text="{DynamicResource SettingsSectionEmpty}" />
+                    <StackPanel Spacing="8">
+                        <TextBlock Text="{DynamicResource UiLanguageLabel}" />
+                        <ComboBox ItemsSource="{Binding UiLanguages}"
+                                  SelectedItem="{Binding SelectedUiLanguage}"
+                                  Width="220">
+                            <ComboBox.ItemTemplate>
+                                <DataTemplate>
+                                    <TextBlock Text="{Binding DisplayName}" />
+                                </DataTemplate>
+                            </ComboBox.ItemTemplate>
+                        </ComboBox>
+                    </StackPanel>
                 </Border>
             </StackPanel>
 
             <StackPanel Spacing="6">
                 <TextBlock Text="{DynamicResource LlmSectionTitle}" FontWeight="SemiBold" />
                 <Border BorderThickness="1" BorderBrush="#333333" Padding="8">
-                    <TextBlock Text="{DynamicResource SettingsSectionEmpty}" />
+                    <StackPanel Spacing="8">
+                        <TextBlock Text="{DynamicResource OllamaUrlLabel}" />
+                        <TextBox Text="{Binding OllamaUrl}" />
+
+                        <TextBlock Text="{DynamicResource DefaultModelLabel}" />
+                        <ComboBox ItemsSource="{Binding ModelOptions}"
+                                  SelectedItem="{Binding SelectedModel}"
+                                  Width="220" />
+
+                        <TextBlock Text="{DynamicResource DefaultSourceLanguageLabel}" />
+                        <ComboBox ItemsSource="{Binding LanguageOptions}"
+                                  SelectedItem="{Binding SelectedSourceLanguage}"
+                                  Width="220">
+                            <ComboBox.ItemTemplate>
+                                <DataTemplate>
+                                    <TextBlock Text="{Binding DisplayName}" />
+                                </DataTemplate>
+                            </ComboBox.ItemTemplate>
+                        </ComboBox>
+
+                        <TextBlock Text="{DynamicResource DefaultTargetLanguageLabel}" />
+                        <ComboBox ItemsSource="{Binding LanguageOptions}"
+                                  SelectedItem="{Binding SelectedTargetLanguage}"
+                                  Width="220">
+                            <ComboBox.ItemTemplate>
+                                <DataTemplate>
+                                    <TextBlock Text="{Binding DisplayName}" />
+                                </DataTemplate>
+                            </ComboBox.ItemTemplate>
+                        </ComboBox>
+                    </StackPanel>
                 </Border>
             </StackPanel>
 

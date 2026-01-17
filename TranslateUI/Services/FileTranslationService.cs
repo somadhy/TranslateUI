@@ -20,6 +20,7 @@ public interface IFileTranslationService
 
 public sealed class FileTranslationService : IFileTranslationService
 {
+    private const long MaxFileSizeBytes = 50L * 1024 * 1024;
     private readonly IEnumerable<IFileHandler> _handlers;
     private readonly ITranslationService _translationService;
     private readonly ISettingsService _settingsService;
@@ -52,6 +53,12 @@ public sealed class FileTranslationService : IFileTranslationService
         if (!File.Exists(inputPath))
         {
             return FileTranslationResult.Failure("ErrorFileNotFound");
+        }
+
+        var fileInfo = new FileInfo(inputPath);
+        if (fileInfo.Length > MaxFileSizeBytes)
+        {
+            return FileTranslationResult.Failure("ErrorFileTooLarge");
         }
 
         if (string.IsNullOrWhiteSpace(outputPath))

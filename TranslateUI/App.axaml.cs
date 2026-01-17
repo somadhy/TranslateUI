@@ -1,12 +1,14 @@
+using System;
+using System.Linq;
+using System.Net.Http;
+using System.Threading.Tasks;
 using Avalonia;
+using Avalonia.Controls;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Data.Core;
 using Avalonia.Data.Core.Plugins;
-using System.Linq;
-using System;
-using System.Threading.Tasks;
-using System.Net.Http;
 using Avalonia.Markup.Xaml;
+using Avalonia.Platform;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Serilog.Extensions.Logging;
@@ -19,6 +21,8 @@ namespace TranslateUI;
 public partial class App : Application
 {
     public static ServiceProvider Services { get; private set; } = null!;
+    private TrayIcon? _trayIcon;
+    private bool _isExitRequested;
 
     public override void Initialize()
     {
@@ -49,9 +53,81 @@ public partial class App : Application
             var mainWindow = Services.GetRequiredService<MainWindow>();
             mainWindow.DataContext = Services.GetRequiredService<MainWindowViewModel>();
             desktop.MainWindow = mainWindow;
+
+            InitializeTray(desktop, mainWindow);
         }
 
         base.OnFrameworkInitializationCompleted();
+    }
+
+    private void InitializeTray(IClassicDesktopStyleApplicationLifetime desktop, Window mainWindow)
+    {
+        var menu = new NativeMenu();
+
+        var openItem = new NativeMenuItem("Open");
+        openItem.Click += (_, _) => ShowMainWindow(mainWindow);
+
+        var translateItem = new NativeMenuItem("Translate");
+        translateItem.Click += (_, _) => TriggerTranslate(mainWindow);
+
+        var exitItem = new NativeMenuItem("Exit");
+        exitItem.Click += (_, _) =>
+        {
+            _isExitRequested = true;
+            desktop.Shutdown();
+        };
+
+        menu.Items.Add(openItem);
+        menu.Items.Add(translateItem);
+        menu.Items.Add(new NativeMenuItemSeparator());
+        menu.Items.Add(exitItem);
+
+        var trayIconStream = AssetLoader.Open(new Uri("avares://TranslateUI/Assets/avalonia-logo.ico"));
+        _trayIcon = new TrayIcon
+        {
+            Icon = new WindowIcon(trayIconStream),
+            ToolTipText = "TranslateUI",
+            Menu = menu
+        };
+
+        mainWindow.Closing += (_, args) =>
+        {
+            if (_isExitRequested)
+            {
+                return;
+            }
+
+            args.Cancel = true;
+            mainWindow.Hide();
+        };
+    }
+
+    private static void ShowMainWindow(Window mainWindow)
+    {
+        if (!mainWindow.IsVisible)
+        {
+            mainWindow.Show();
+        }
+
+        if (mainWindow.WindowState == WindowState.Minimized)
+        {
+            mainWindow.WindowState = WindowState.Normal;
+        }
+
+        mainWindow.Activate();
+    }
+
+    private static void TriggerTranslate(Window mainWindow)
+    {
+        if (mainWindow.DataContext is not MainWindowViewModel viewModel)
+        {
+            return;
+        }
+
+        if (viewModel.TranslateCommand.CanExecute(null))
+        {
+            viewModel.TranslateCommand.Execute(null);
+        }
     }
 
     private void DisableAvaloniaDataAnnotationValidation()
@@ -112,11 +188,14 @@ public partial class App : Application
         services.AddSingleton<ITranslationService, TranslationService>();
         services.AddSingleton<IFileDialogService>(_ =>
             new FileDialogService((IClassicDesktopStyleApplicationLifetime)ApplicationLifetime!));
+        services.AddSingleton<IClipboardService>(_ =>
+            new ClipboardService((IClassicDesktopStyleApplicationLifetime)ApplicationLifetime!));
         services.AddSingleton<IFileHandler, TxtMdFileHandler>();
         services.AddSingleton<IFileHandler, PdfFileHandler>();
         services.AddSingleton<IFileHandler, DocxFileHandler>();
         services.AddSingleton<IFileHandler, OdtFileHandler>();
         services.AddSingleton<IFileTranslationService, FileTranslationService>();
+        services.AddSingleton<IImageTranslationService, ImageTranslationService>();
         services.AddSingleton<MainWindow>();
         services.AddSingleton<MainWindowViewModel>();
         services.AddSingleton<SettingsWindow>();

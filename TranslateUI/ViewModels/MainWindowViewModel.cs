@@ -19,8 +19,10 @@ public partial class MainWindowViewModel : ViewModelBase
     private readonly ILogger<MainWindowViewModel> _logger;
     private readonly ITranslationService _translationService;
     private readonly IOllamaClient _ollamaClient;
+    private readonly IImageTranslationService _imageTranslationService;
     private readonly IFileTranslationService _fileTranslationService;
     private readonly IFileDialogService _fileDialogService;
+    private readonly IClipboardService _clipboardService;
     private readonly ILanguageService _languageService;
     private readonly ISettingsService _settingsService;
     private bool _suppressLanguageUsage;
@@ -30,16 +32,20 @@ public partial class MainWindowViewModel : ViewModelBase
         ILogger<MainWindowViewModel> logger,
         ITranslationService translationService,
         IOllamaClient ollamaClient,
+        IImageTranslationService imageTranslationService,
         IFileTranslationService fileTranslationService,
         IFileDialogService fileDialogService,
+        IClipboardService clipboardService,
         ILanguageService languageService,
         ISettingsService settingsService)
     {
         _logger = logger;
         _translationService = translationService;
         _ollamaClient = ollamaClient;
+        _imageTranslationService = imageTranslationService;
         _fileTranslationService = fileTranslationService;
         _fileDialogService = fileDialogService;
+        _clipboardService = clipboardService;
         _languageService = languageService;
         _settingsService = settingsService;
         TranslateCommand = new AsyncRelayCommand(TranslateAsync, CanTranslate);
@@ -49,6 +55,14 @@ public partial class MainWindowViewModel : ViewModelBase
         OpenOutputCommand = new AsyncRelayCommand(OpenOutputAsync, CanOpenOutput);
         DownloadModelCommand = new AsyncRelayCommand(DownloadSelectedModelAsync, CanDownloadSelectedModel);
         SwapLanguagesCommand = new RelayCommand(SwapLanguages, () => !IsBusy);
+        PasteSourceCommand = new AsyncRelayCommand(PasteSourceAsync, () => !IsBusy);
+        CopyResultCommand = new AsyncRelayCommand(CopyResultAsync, () => !IsBusy && !string.IsNullOrWhiteSpace(ResultText));
+        SaveResultCommand = new AsyncRelayCommand(SaveResultAsync, () => !IsBusy && !string.IsNullOrWhiteSpace(ResultText));
+        OpenSavedResultCommand = new AsyncRelayCommand(OpenSavedResultAsync, CanOpenSavedResult);
+        BrowseImageCommand = new AsyncRelayCommand(BrowseImageAsync, () => !IsBusy);
+        TranslateImageCommand = new AsyncRelayCommand(TranslateImageAsync, CanTranslateImage);
+        CopyImageResultCommand = new AsyncRelayCommand(CopyImageResultAsync, () => !IsBusy && !string.IsNullOrWhiteSpace(ImageResultText));
+        SaveImageResultCommand = new AsyncRelayCommand(SaveImageResultAsync, () => !IsBusy && !string.IsNullOrWhiteSpace(ImageResultText));
         _allLanguages = _languageService.Languages.ToList();
         Languages = new ObservableCollection<LanguageInfo>(GetOrderedLanguages());
         _suppressLanguageUsage = true;
@@ -72,6 +86,22 @@ public partial class MainWindowViewModel : ViewModelBase
     public IAsyncRelayCommand DownloadModelCommand { get; }
 
     public IRelayCommand SwapLanguagesCommand { get; }
+
+    public IAsyncRelayCommand PasteSourceCommand { get; }
+
+    public IAsyncRelayCommand CopyResultCommand { get; }
+
+    public IAsyncRelayCommand SaveResultCommand { get; }
+
+    public IAsyncRelayCommand OpenSavedResultCommand { get; }
+
+    public IAsyncRelayCommand BrowseImageCommand { get; }
+
+    public IAsyncRelayCommand TranslateImageCommand { get; }
+
+    public IAsyncRelayCommand CopyImageResultCommand { get; }
+
+    public IAsyncRelayCommand SaveImageResultCommand { get; }
 
     public ObservableCollection<LanguageInfo> Languages { get; }
 
@@ -103,6 +133,15 @@ public partial class MainWindowViewModel : ViewModelBase
     private string outputFilePath = string.Empty;
 
     [ObservableProperty]
+    private string imageFilePath = string.Empty;
+
+    [ObservableProperty]
+    private string imageResultText = string.Empty;
+
+    [ObservableProperty]
+    private string? savedResultPath;
+
+    [ObservableProperty]
     private LanguageInfo? selectedSourceLanguage;
 
     [ObservableProperty]
@@ -116,6 +155,9 @@ public partial class MainWindowViewModel : ViewModelBase
 
     [ObservableProperty]
     private bool isSelectedModelAvailable;
+
+    [ObservableProperty]
+    private bool isVisionSupported;
 
     [ObservableProperty]
     private double modelDownloadProgress;
@@ -137,7 +179,20 @@ public partial class MainWindowViewModel : ViewModelBase
 
     public string SelectedModelName => GetSelectedModelName();
 
+    public void SetInputFilePathFromUi(string path)
+    {
+        InputFilePath = path;
+        OutputFilePath = string.IsNullOrWhiteSpace(path) ? string.Empty : BuildDefaultOutputPath(path);
+    }
+
+    public void SetImageFilePathFromUi(string path)
+    {
+        ImageFilePath = path;
+    }
+
     public bool IsModelMissing => IsModelAvailabilityKnown && !IsSelectedModelAvailable;
+
+    public bool IsImageTabVisible => IsVisionSupported;
 
     public Func<string, object?, bool> FilterLanguage => FilterLanguageItem;
 
@@ -147,6 +202,11 @@ public partial class MainWindowViewModel : ViewModelBase
         !IsBusy && !string.IsNullOrWhiteSpace(InputFilePath) && !string.IsNullOrWhiteSpace(OutputFilePath);
 
     private bool CanOpenOutput() => !IsBusy && File.Exists(OutputFilePath);
+
+    private bool CanOpenSavedResult() => !IsBusy && !string.IsNullOrWhiteSpace(SavedResultPath) && File.Exists(SavedResultPath);
+
+    private bool CanTranslateImage() =>
+        !IsBusy && IsVisionSupported && !string.IsNullOrWhiteSpace(ImageFilePath);
 
     private bool CanDownloadSelectedModel() => !IsBusy && !IsModelDownloading && IsModelMissing;
 
@@ -171,6 +231,7 @@ public partial class MainWindowViewModel : ViewModelBase
             {
                 ResultText = result.Text ?? string.Empty;
                 ErrorMessageKey = null;
+                StatusMessageKey = "TranslationSuccess";
             }
             else
             {
@@ -225,6 +286,46 @@ public partial class MainWindowViewModel : ViewModelBase
         }
     }
 
+    private async Task BrowseImageAsync()
+    {
+        var path = await _fileDialogService.OpenImageFileAsync();
+        if (!string.IsNullOrWhiteSpace(path))
+        {
+            ImageFilePath = path;
+        }
+    }
+
+    private async Task TranslateImageAsync()
+    {
+        ErrorMessageKey = null;
+        StatusMessageKey = null;
+        ImageResultText = string.Empty;
+        IsBusy = true;
+
+        try
+        {
+            var settings = _settingsService.Current;
+            var result = await _imageTranslationService.TranslateImageAsync(
+                ImageFilePath,
+                SelectedSourceLanguage?.Code ?? settings.DefaultSourceLang,
+                SelectedTargetLanguage?.Code ?? settings.DefaultTargetLang,
+                SelectedModelName);
+            if (result.IsSuccess)
+            {
+                ImageResultText = result.Text ?? string.Empty;
+                StatusMessageKey = "ImageTranslationSuccess";
+            }
+            else
+            {
+                ErrorMessageKey = result.ErrorKey;
+            }
+        }
+        finally
+        {
+            IsBusy = false;
+        }
+    }
+
     private async Task BrowseOutputAsync()
     {
         var path = await _fileDialogService.SaveFileAsync(OutputFilePath);
@@ -254,6 +355,97 @@ public partial class MainWindowViewModel : ViewModelBase
         catch (Exception ex)
         {
             _logger.LogWarning(ex, "Failed to open output file");
+            ErrorMessageKey = "ErrorOutputFileNotFound";
+        }
+
+        return Task.CompletedTask;
+    }
+
+    private async Task PasteSourceAsync()
+    {
+        var text = await _clipboardService.GetTextAsync();
+        if (!string.IsNullOrWhiteSpace(text))
+        {
+            SourceText = text;
+        }
+    }
+
+    private async Task CopyResultAsync()
+    {
+        if (string.IsNullOrWhiteSpace(ResultText))
+        {
+            return;
+        }
+
+        await _clipboardService.SetTextAsync(ResultText);
+        StatusMessageKey = "ResultCopied";
+    }
+
+    private async Task CopyImageResultAsync()
+    {
+        if (string.IsNullOrWhiteSpace(ImageResultText))
+        {
+            return;
+        }
+
+        await _clipboardService.SetTextAsync(ImageResultText);
+        StatusMessageKey = "ImageResultCopied";
+    }
+
+    private async Task SaveResultAsync()
+    {
+        if (string.IsNullOrWhiteSpace(ResultText))
+        {
+            return;
+        }
+
+        var path = await _fileDialogService.SaveFileAsync(SavedResultPath);
+        if (string.IsNullOrWhiteSpace(path))
+        {
+            return;
+        }
+
+        await File.WriteAllTextAsync(path, ResultText);
+        SavedResultPath = path;
+        StatusMessageKey = "ResultSaved";
+    }
+
+    private async Task SaveImageResultAsync()
+    {
+        if (string.IsNullOrWhiteSpace(ImageResultText))
+        {
+            return;
+        }
+
+        var path = await _fileDialogService.SaveFileAsync(null);
+        if (string.IsNullOrWhiteSpace(path))
+        {
+            return;
+        }
+
+        await File.WriteAllTextAsync(path, ImageResultText);
+        StatusMessageKey = "ImageResultSaved";
+    }
+
+    private Task OpenSavedResultAsync()
+    {
+        if (string.IsNullOrWhiteSpace(SavedResultPath) || !File.Exists(SavedResultPath))
+        {
+            ErrorMessageKey = "ErrorOutputFileNotFound";
+            return Task.CompletedTask;
+        }
+
+        try
+        {
+            Process.Start(new ProcessStartInfo
+            {
+                FileName = SavedResultPath,
+                UseShellExecute = true
+            });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogWarning(ex, "Failed to open saved result");
             ErrorMessageKey = "ErrorOutputFileNotFound";
         }
 
@@ -443,12 +635,21 @@ public partial class MainWindowViewModel : ViewModelBase
             var available = new HashSet<string>(tags, StringComparer.OrdinalIgnoreCase);
             IsModelAvailabilityKnown = true;
             IsSelectedModelAvailable = available.Contains(SelectedModelName);
+            if (IsSelectedModelAvailable)
+            {
+                IsVisionSupported = await _ollamaClient.SupportsVisionAsync(SelectedModelName);
+            }
+            else
+            {
+                IsVisionSupported = false;
+            }
         }
         catch (Exception ex)
         {
             _logger.LogWarning(ex, "Failed to check model availability");
             IsModelAvailabilityKnown = false;
             IsSelectedModelAvailable = false;
+            IsVisionSupported = false;
             StatusMessageKey = "ModelCheckFailed";
         }
     }
@@ -467,6 +668,12 @@ public partial class MainWindowViewModel : ViewModelBase
     partial void OnSourceTextChanged(string value)
     {
         TranslateCommand.NotifyCanExecuteChanged();
+    }
+
+    partial void OnResultTextChanged(string value)
+    {
+        CopyResultCommand.NotifyCanExecuteChanged();
+        SaveResultCommand.NotifyCanExecuteChanged();
     }
 
     partial void OnSelectedSourceLanguageChanged(LanguageInfo? value)
@@ -524,6 +731,25 @@ public partial class MainWindowViewModel : ViewModelBase
         OpenOutputCommand.NotifyCanExecuteChanged();
     }
 
+    partial void OnSavedResultPathChanged(string? value)
+    {
+        OpenSavedResultCommand.NotifyCanExecuteChanged();
+    }
+
+    partial void OnImageFilePathChanged(string value)
+    {
+        ImageResultText = string.Empty;
+        ErrorMessageKey = null;
+        StatusMessageKey = null;
+        TranslateImageCommand.NotifyCanExecuteChanged();
+    }
+
+    partial void OnImageResultTextChanged(string value)
+    {
+        CopyImageResultCommand.NotifyCanExecuteChanged();
+        SaveImageResultCommand.NotifyCanExecuteChanged();
+    }
+
     partial void OnIsBusyChanged(bool value)
     {
         TranslateCommand.NotifyCanExecuteChanged();
@@ -533,7 +759,20 @@ public partial class MainWindowViewModel : ViewModelBase
         OpenOutputCommand.NotifyCanExecuteChanged();
         DownloadModelCommand.NotifyCanExecuteChanged();
         SwapLanguagesCommand.NotifyCanExecuteChanged();
+        PasteSourceCommand.NotifyCanExecuteChanged();
+        CopyResultCommand.NotifyCanExecuteChanged();
+        SaveResultCommand.NotifyCanExecuteChanged();
+        OpenSavedResultCommand.NotifyCanExecuteChanged();
+        BrowseImageCommand.NotifyCanExecuteChanged();
+        TranslateImageCommand.NotifyCanExecuteChanged();
+        CopyImageResultCommand.NotifyCanExecuteChanged();
+        SaveImageResultCommand.NotifyCanExecuteChanged();
         OnPropertyChanged(nameof(IsNotBusy));
+    }
+
+    partial void OnIsVisionSupportedChanged(bool value)
+    {
+        OnPropertyChanged(nameof(IsImageTabVisible));
     }
 
     partial void OnIsModelDownloadingChanged(bool value)

@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Json;
 using System.Text.Json;
@@ -14,7 +15,13 @@ namespace TranslateUI.Services;
 public interface IOllamaClient
 {
     Task<string> GenerateAsync(string model, string prompt, CancellationToken cancellationToken = default);
+    Task<string> GenerateWithImagesAsync(
+        string model,
+        string prompt,
+        IReadOnlyList<string> imagesBase64,
+        CancellationToken cancellationToken = default);
     Task<IReadOnlyList<string>> GetTagsAsync(CancellationToken cancellationToken = default);
+    Task<bool> SupportsVisionAsync(string model, CancellationToken cancellationToken = default);
     Task PullModelAsync(
         string model,
         IProgress<ModelPullProgress>? progress = null,
@@ -42,6 +49,38 @@ public sealed class OllamaClient : IOllamaClient
             Model = model,
             Prompt = prompt,
             Stream = false
+        };
+
+        using var response = await _httpClient.PostAsJsonAsync(requestUri, payload, cancellationToken);
+        var content = await response.Content.ReadAsStringAsync(cancellationToken);
+        if (!response.IsSuccessStatusCode)
+        {
+            _logger.LogWarning("Ollama error ({StatusCode}): {Body}", response.StatusCode, content);
+            throw new InvalidOperationException("Ollama request failed.");
+        }
+
+        using var document = JsonDocument.Parse(content);
+        if (!document.RootElement.TryGetProperty("response", out var responseText))
+        {
+            throw new InvalidOperationException("Unexpected Ollama response.");
+        }
+
+        return responseText.GetString() ?? string.Empty;
+    }
+
+    public async Task<string> GenerateWithImagesAsync(
+        string model,
+        string prompt,
+        IReadOnlyList<string> imagesBase64,
+        CancellationToken cancellationToken = default)
+    {
+        var requestUri = BuildRequestUri("/api/generate");
+        var payload = new OllamaGenerateRequest
+        {
+            Model = model,
+            Prompt = prompt,
+            Stream = false,
+            Images = imagesBase64.ToArray()
         };
 
         using var response = await _httpClient.PostAsJsonAsync(requestUri, payload, cancellationToken);
@@ -93,6 +132,52 @@ public sealed class OllamaClient : IOllamaClient
         }
 
         return results;
+    }
+
+    public async Task<bool> SupportsVisionAsync(string model, CancellationToken cancellationToken = default)
+    {
+        var requestUri = BuildRequestUri("/api/show");
+        var payload = new OllamaShowRequest
+        {
+            Name = model
+        };
+
+        using var response = await _httpClient.PostAsJsonAsync(requestUri, payload, cancellationToken);
+        var content = await response.Content.ReadAsStringAsync(cancellationToken);
+        if (!response.IsSuccessStatusCode)
+        {
+            _logger.LogWarning("Ollama show error ({StatusCode}): {Body}", response.StatusCode, content);
+            throw new InvalidOperationException("Ollama show request failed.");
+        }
+
+        using var document = JsonDocument.Parse(content);
+        if (document.RootElement.TryGetProperty("vision", out var visionElement) &&
+            visionElement.ValueKind == JsonValueKind.True)
+        {
+            return true;
+        }
+
+        if (document.RootElement.TryGetProperty("capabilities", out var capabilitiesElement) &&
+            capabilitiesElement.ValueKind == JsonValueKind.Array)
+        {
+            foreach (var capability in capabilitiesElement.EnumerateArray())
+            {
+                if (capability.ValueKind == JsonValueKind.String &&
+                    string.Equals(capability.GetString(), "vision", StringComparison.OrdinalIgnoreCase))
+                {
+                    return true;
+                }
+            }
+        }
+
+        if (document.RootElement.TryGetProperty("details", out var detailsElement) &&
+            detailsElement.TryGetProperty("vision", out var detailsVision) &&
+            detailsVision.ValueKind == JsonValueKind.True)
+        {
+            return true;
+        }
+
+        return false;
     }
 
     public async Task PullModelAsync(
@@ -190,6 +275,8 @@ public sealed class OllamaClient : IOllamaClient
         public string Prompt { get; set; } = string.Empty;
 
         public bool Stream { get; set; }
+
+        public string[]? Images { get; set; }
     }
 
     private sealed class OllamaPullRequest
@@ -197,5 +284,10 @@ public sealed class OllamaClient : IOllamaClient
         public string Name { get; set; } = string.Empty;
 
         public bool Stream { get; set; }
+    }
+
+    private sealed class OllamaShowRequest
+    {
+        public string Name { get; set; } = string.Empty;
     }
 }

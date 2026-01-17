@@ -10,6 +10,7 @@ namespace TranslateUI.Services;
 public interface IFileDialogService
 {
     Task<string?> OpenFileAsync();
+    Task<string?> OpenImageFileAsync();
     Task<string?> SaveFileAsync(string? suggestedPath);
 }
 
@@ -47,6 +48,31 @@ public sealed class FileDialogService : IFileDialogService
                 new("Documents")
                 {
                     Patterns = new List<string> { "*.pdf", "*.docx", "*.odt" }
+                }
+            }
+        };
+
+        var files = await window.StorageProvider.OpenFilePickerAsync(options);
+        return files.FirstOrDefault()?.Path.LocalPath;
+    }
+
+    public async Task<string?> OpenImageFileAsync()
+    {
+        var window = _lifetime.MainWindow;
+        if (window?.StorageProvider is null)
+        {
+            return null;
+        }
+
+        var options = new FilePickerOpenOptions
+        {
+            Title = "Select an image",
+            AllowMultiple = false,
+            FileTypeFilter = new List<FilePickerFileType>
+            {
+                new("Images")
+                {
+                    Patterns = new List<string> { "*.png", "*.jpg", "*.jpeg", "*.tiff", "*.tif" }
                 }
             }
         };

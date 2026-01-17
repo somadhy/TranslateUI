@@ -123,7 +123,7 @@
             <TabControl Grid.Row="2">
             <TabItem Header="{DynamicResource TextTabHeader}"
                      ToolTip.Tip="{DynamicResource TooltipTextTab}">
-                <Grid RowDefinitions="Auto,*" ColumnDefinitions="*,*" ColumnSpacing="16" RowSpacing="8">
+                <Grid RowDefinitions="Auto,*,Auto" ColumnDefinitions="*,*" ColumnSpacing="16" RowSpacing="8">
                     <TextBlock Grid.Row="0"
                                Grid.Column="0"
                                Text="{DynamicResource SourceTextLabel}"
@@ -164,6 +164,34 @@
                              IsReadOnly="True"
                              ToolTip.Tip="{DynamicResource TooltipResultText}"
                              Watermark="{DynamicResource ResultTextPlaceholder}" />
+
+                    <StackPanel Grid.Row="2"
+                                Grid.Column="0"
+                                Orientation="Horizontal"
+                                Spacing="8">
+                        <Button Content="{DynamicResource PasteButton}"
+                                Width="120"
+                                Command="{Binding PasteSourceCommand}"
+                                ToolTip.Tip="{DynamicResource TooltipPaste}" />
+                    </StackPanel>
+
+                    <StackPanel Grid.Row="2"
+                                Grid.Column="1"
+                                Orientation="Horizontal"
+                                Spacing="8">
+                        <Button Content="{DynamicResource CopyButton}"
+                                Width="120"
+                                Command="{Binding CopyResultCommand}"
+                                ToolTip.Tip="{DynamicResource TooltipCopyResult}" />
+                        <Button Content="{DynamicResource SaveButton}"
+                                Width="120"
+                                Command="{Binding SaveResultCommand}"
+                                ToolTip.Tip="{DynamicResource TooltipSaveResult}" />
+                        <Button Content="{DynamicResource OpenSavedButton}"
+                                Width="140"
+                                Command="{Binding OpenSavedResultCommand}"
+                                ToolTip.Tip="{DynamicResource TooltipOpenSavedResult}" />
+                    </StackPanel>
                 </Grid>
             </TabItem>
 
@@ -176,6 +204,8 @@
                     <TextBox Grid.Column="1"
                              Text="{Binding InputFilePath}"
                              IsReadOnly="True"
+                             DragDrop.AllowDrop="True"
+                             DragDrop.Drop="OnFileDrop"
                              ToolTip.Tip="{DynamicResource TooltipInputFile}" />
                     <Button Grid.Column="2"
                             Content="{DynamicResource BrowseButton}"
@@ -205,6 +235,59 @@
                                 Width="140"
                                 Command="{Binding OpenOutputCommand}"
                                 ToolTip.Tip="{DynamicResource TooltipOpenResult}" />
+                    </StackPanel>
+                </Grid>
+            </TabItem>
+
+            <TabItem Header="{DynamicResource ImageTabHeader}"
+                     ToolTip.Tip="{DynamicResource TooltipImageTab}"
+                     IsVisible="{Binding IsImageTabVisible}">
+                <Grid RowDefinitions="Auto,*,Auto" ColumnDefinitions="Auto,*,Auto" ColumnSpacing="8" RowSpacing="8">
+                    <TextBlock Text="{DynamicResource InputFileLabel}"
+                               VerticalAlignment="Center"
+                               ToolTip.Tip="{DynamicResource TooltipImageFile}" />
+                    <TextBox Grid.Column="1"
+                             Text="{Binding ImageFilePath}"
+                             IsReadOnly="True"
+                             DragDrop.AllowDrop="True"
+                             DragDrop.Drop="OnImageDrop"
+                             ToolTip.Tip="{DynamicResource TooltipImageFile}" />
+                    <Button Grid.Column="2"
+                            Content="{DynamicResource BrowseButton}"
+                            Command="{Binding BrowseImageCommand}"
+                            ToolTip.Tip="{DynamicResource TooltipBrowseInput}" />
+
+                    <TextBlock Grid.Row="1"
+                               Text="{DynamicResource ResultTextLabel}"
+                               VerticalAlignment="Center"
+                               ToolTip.Tip="{DynamicResource TooltipResultText}" />
+                    <TextBox Grid.Row="1"
+                             Grid.Column="1"
+                             Grid.ColumnSpan="2"
+                             Text="{Binding ImageResultText}"
+                             AcceptsReturn="True"
+                             TextWrapping="Wrap"
+                             VerticalAlignment="Stretch"
+                             IsReadOnly="True"
+                             ToolTip.Tip="{DynamicResource TooltipResultText}"
+                             Watermark="{DynamicResource ResultTextPlaceholder}" />
+
+                    <StackPanel Grid.Row="2"
+                                Grid.Column="1"
+                                Orientation="Horizontal"
+                                Spacing="8">
+                        <Button Content="{DynamicResource TranslateImageButton}"
+                                Width="200"
+                                Command="{Binding TranslateImageCommand}"
+                                ToolTip.Tip="{DynamicResource TooltipTranslateImage}" />
+                        <Button Content="{DynamicResource CopyButton}"
+                                Width="120"
+                                Command="{Binding CopyImageResultCommand}"
+                                ToolTip.Tip="{DynamicResource TooltipCopyResult}" />
+                        <Button Content="{DynamicResource SaveButton}"
+                                Width="120"
+                                Command="{Binding SaveImageResultCommand}"
+                                ToolTip.Tip="{DynamicResource TooltipSaveResult}" />
                     </StackPanel>
                 </Grid>
             </TabItem>
