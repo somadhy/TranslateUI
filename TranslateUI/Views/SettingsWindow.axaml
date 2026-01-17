@@ -8,21 +8,45 @@
         x:DataType="vm:SettingsWindowViewModel"
         Title="{DynamicResource SettingsTitle}">
     <Grid RowDefinitions="*,Auto" Margin="16">
-        <StackPanel Spacing="8">
-            <TextBlock Text="{DynamicResource LogLevelLabel}" />
-            <ComboBox ItemsSource="{Binding LogLevels}"
-                      SelectedItem="{Binding SelectedLogLevel}"
-                      Width="220">
-                <ComboBox.ItemTemplate>
-                    <DataTemplate>
-                        <TextBlock Text="{Binding ResourceKey, Converter={StaticResource ResourceKeyToStringConverter}}" />
-                    </DataTemplate>
-                </ComboBox.ItemTemplate>
-            </ComboBox>
+        <StackPanel Spacing="12">
+            <StackPanel Spacing="6">
+                <TextBlock Text="{DynamicResource InterfaceSectionTitle}" FontWeight="SemiBold" />
+                <Border BorderThickness="1" BorderBrush="#333333" Padding="8">
+                    <TextBlock Text="{DynamicResource SettingsSectionEmpty}" />
+                </Border>
+            </StackPanel>
 
-            <TextBlock Text="{DynamicResource LogFilePathLabel}" />
-            <TextBox Text="{Binding LogFilePath}" />
-            <TextBlock Text="{DynamicResource LogFilePathHint}" FontSize="12" />
+            <StackPanel Spacing="6">
+                <TextBlock Text="{DynamicResource LlmSectionTitle}" FontWeight="SemiBold" />
+                <Border BorderThickness="1" BorderBrush="#333333" Padding="8">
+                    <TextBlock Text="{DynamicResource SettingsSectionEmpty}" />
+                </Border>
+            </StackPanel>
+
+            <StackPanel Spacing="6">
+                <TextBlock Text="{DynamicResource DebugSectionTitle}" FontWeight="SemiBold" />
+                <Border BorderThickness="1" BorderBrush="#333333" Padding="8">
+                    <StackPanel Spacing="8">
+                        <TextBlock Text="{DynamicResource LogLevelLabel}" />
+                        <ComboBox ItemsSource="{Binding LogLevels}"
+                                  SelectedItem="{Binding SelectedLogLevel}"
+                                  Width="220">
+                            <ComboBox.ItemTemplate>
+                                <DataTemplate>
+                                    <TextBlock Text="{Binding ResourceKey, Converter={StaticResource ResourceKeyToStringConverter}}" />
+                                </DataTemplate>
+                            </ComboBox.ItemTemplate>
+                        </ComboBox>
+
+                        <TextBlock Text="{DynamicResource LogFilePathLabel}" />
+                        <TextBox Text="{Binding LogFilePath}" />
+                        <Button Content="{DynamicResource OpenLogFileButton}"
+                                Width="160"
+                                Command="{Binding OpenLogFileCommand}" />
+                        <TextBlock Text="{DynamicResource LogFilePathHint}" FontSize="12" />
+                    </StackPanel>
+                </Border>
+            </StackPanel>
         </StackPanel>
         <StackPanel Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Right" Spacing="8">
             <Button Content="{DynamicResource CloseButton}" Click="OnCloseClicked" />

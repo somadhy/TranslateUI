@@ -16,8 +16,9 @@
         <vm:MainWindowViewModel/>
     </Design.DataContext>
 
-    <Grid RowDefinitions="Auto,Auto,*" Margin="16">
-        <Grid ColumnDefinitions="Auto,Auto,Auto,Auto,*" ColumnSpacing="12">
+    <Grid>
+        <Grid RowDefinitions="Auto,Auto,*" Margin="16" IsEnabled="{Binding IsNotBusy}">
+            <Grid ColumnDefinitions="Auto,Auto,Auto,Auto,*" ColumnSpacing="12">
             <Button Content="{DynamicResource SettingsButton}"
                     Width="140"
                     ToolTip.Tip="{DynamicResource TooltipSettings}"
@@ -105,9 +106,9 @@
                                  Value="{Binding ModelDownloadProgress}" />
                 </StackPanel>
             </StackPanel>
-        </Grid>
+            </Grid>
 
-        <StackPanel Grid.Row="1" Spacing="4">
+            <StackPanel Grid.Row="1" Spacing="4">
             <TextBlock Text="{Binding ErrorMessageKey, Converter={x:Static conv:ResourceKeyToStringConverter.Instance}}"
                        Foreground="Tomato"
                        IsVisible="{Binding HasError}" />
@@ -119,7 +120,7 @@
                        IsVisible="{Binding IsModelMissing}" />
         </StackPanel>
 
-        <TabControl Grid.Row="2">
+            <TabControl Grid.Row="2">
             <TabItem Header="{DynamicResource TextTabHeader}"
                      ToolTip.Tip="{DynamicResource TooltipTextTab}">
                 <Grid RowDefinitions="Auto,*" ColumnDefinitions="*,*" ColumnSpacing="16" RowSpacing="8">
@@ -207,7 +208,18 @@
                     </StackPanel>
                 </Grid>
             </TabItem>
-        </TabControl>
+            </TabControl>
+        </Grid>
+
+        <Border Background="#80000000"
+                IsVisible="{Binding IsBusy}"
+                HorizontalAlignment="Stretch"
+                VerticalAlignment="Stretch">
+            <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="8">
+                <ProgressBar IsIndeterminate="True" Width="240" />
+                <TextBlock Text="{DynamicResource TranslatingStatus}" Foreground="White" />
+            </StackPanel>
+        </Border>
     </Grid>
 
 </Window>

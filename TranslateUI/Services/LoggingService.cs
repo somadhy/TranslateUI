@@ -1,5 +1,6 @@
 using System;
 using System.IO;
+using System.Linq;
 using Serilog;
 using Serilog.Core;
 using Serilog.Events;
@@ -12,6 +13,7 @@ public interface ILoggingService
     string LogFilePath { get; }
     void SetMinimumLevel(Microsoft.Extensions.Logging.LogLevel level);
     void SetLogFilePath(string path);
+    string GetLatestLogFilePath();
 }
 
 public sealed class LoggingService : ILoggingService
@@ -53,6 +55,28 @@ public sealed class LoggingService : ILoggingService
         _logFilePath = nextPath;
         _logger = CreateLogger();
         _logger.Information("Log file path set to {LogPath}", _logFilePath);
+    }
+
+    public string GetLatestLogFilePath()
+    {
+        var directory = Path.GetDirectoryName(_logFilePath);
+        if (string.IsNullOrWhiteSpace(directory) || !Directory.Exists(directory))
+        {
+            return _logFilePath;
+        }
+
+        var files = Directory.GetFiles(directory, "app-*.log");
+        if (files.Length == 0)
+        {
+            return _logFilePath;
+        }
+
+        var latest = files
+            .Select(path => new FileInfo(path))
+            .OrderByDescending(info => info.LastWriteTimeUtc)
+            .FirstOrDefault();
+
+        return latest?.FullName ?? _logFilePath;
     }
 
     private Serilog.ILogger CreateLogger()

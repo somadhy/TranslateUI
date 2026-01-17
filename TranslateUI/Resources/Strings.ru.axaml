@@ -15,6 +15,7 @@
   <x:String x:Key="SourceTextPlaceholder">Введите текст для перевода...</x:String>
   <x:String x:Key="TranslateShortcutHint">Перевод: Ctrl+Enter или Cmd+Enter</x:String>
   <x:String x:Key="ResultTextPlaceholder">Здесь появится перевод</x:String>
+  <x:String x:Key="TranslatingStatus">Идёт перевод...</x:String>
   <x:String x:Key="InputFileLabel">Исходный файл</x:String>
   <x:String x:Key="OutputFileLabel">Путь результата</x:String>
   <x:String x:Key="BrowseButton">Выбрать</x:String>
@@ -27,6 +28,11 @@
   <x:String x:Key="SettingsButton">Настройки</x:String>
   <x:String x:Key="SettingsTitle">Настройки</x:String>
   <x:String x:Key="CloseButton">Закрыть</x:String>
+  <x:String x:Key="InterfaceSectionTitle">Интерфейс</x:String>
+  <x:String x:Key="LlmSectionTitle">LLM</x:String>
+  <x:String x:Key="DebugSectionTitle">Отладка</x:String>
+  <x:String x:Key="SettingsSectionEmpty">Пока нет настроек.</x:String>
+  <x:String x:Key="OpenLogFileButton">Открыть лог</x:String>
   <x:String x:Key="LogLevelDebug">Отладка</x:String>
   <x:String x:Key="LogLevelInfo">Информация</x:String>
   <x:String x:Key="LogLevelWarn">Предупреждения</x:String>

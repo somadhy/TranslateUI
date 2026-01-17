@@ -1,5 +1,7 @@
 using System.Collections.ObjectModel;
+using System.Diagnostics;
 using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
 using Microsoft.Extensions.Logging;
 using TranslateUI.Models;
 using TranslateUI.Services;
@@ -28,6 +30,7 @@ public partial class SettingsWindowViewModel : ViewModelBase
         var current = _settingsService.Current.LogLevel;
         SelectedLogLevel = FindOption(current);
         LogFilePath = _settingsService.Current.LogFilePath;
+        OpenLogFileCommand = new RelayCommand(OpenLogFile);
     }
 
     public ObservableCollection<LogLevelOption> LogLevels { get; }
@@ -37,6 +40,8 @@ public partial class SettingsWindowViewModel : ViewModelBase
 
     [ObservableProperty]
     private string logFilePath = string.Empty;
+
+    public IRelayCommand OpenLogFileCommand { get; }
 
     partial void OnSelectedLogLevelChanged(LogLevelOption value)
     {
@@ -59,6 +64,27 @@ public partial class SettingsWindowViewModel : ViewModelBase
         _settingsService.Current.LogFilePath = value;
         _settingsService.Save();
         _loggingService.SetLogFilePath(value);
+    }
+
+    private void OpenLogFile()
+    {
+        var path = _loggingService.GetLatestLogFilePath();
+        if (string.IsNullOrWhiteSpace(path))
+        {
+            return;
+        }
+
+        try
+        {
+            Process.Start(new ProcessStartInfo
+            {
+                FileName = path,
+                UseShellExecute = true
+            });
+        }
+        catch
+        {
+        }
     }
 
     private LogLevelOption FindOption(LogLevel level)

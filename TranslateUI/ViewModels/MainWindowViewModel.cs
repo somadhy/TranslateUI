@@ -94,6 +94,8 @@ public partial class MainWindowViewModel : ViewModelBase
 
     public bool HasStatus => !string.IsNullOrWhiteSpace(StatusMessageKey);
 
+    public bool IsNotBusy => !IsBusy;
+
     [ObservableProperty]
     private string inputFilePath = string.Empty;
 
@@ -531,6 +533,7 @@ public partial class MainWindowViewModel : ViewModelBase
         OpenOutputCommand.NotifyCanExecuteChanged();
         DownloadModelCommand.NotifyCanExecuteChanged();
         SwapLanguagesCommand.NotifyCanExecuteChanged();
+        OnPropertyChanged(nameof(IsNotBusy));
     }
 
     partial void OnIsModelDownloadingChanged(bool value)

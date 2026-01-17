@@ -15,6 +15,7 @@
   <x:String x:Key="SourceTextPlaceholder">Enter text to translate...</x:String>
   <x:String x:Key="TranslateShortcutHint">Translate: Ctrl+Enter or Cmd+Enter</x:String>
   <x:String x:Key="ResultTextPlaceholder">Translation will appear here</x:String>
+  <x:String x:Key="TranslatingStatus">Translating...</x:String>
   <x:String x:Key="InputFileLabel">Input file</x:String>
   <x:String x:Key="OutputFileLabel">Output path</x:String>
   <x:String x:Key="BrowseButton">Browse</x:String>
@@ -27,6 +28,11 @@
   <x:String x:Key="SettingsButton">Settings</x:String>
   <x:String x:Key="SettingsTitle">Settings</x:String>
   <x:String x:Key="CloseButton">Close</x:String>
+  <x:String x:Key="InterfaceSectionTitle">Interface</x:String>
+  <x:String x:Key="LlmSectionTitle">LLM</x:String>
+  <x:String x:Key="DebugSectionTitle">Debug</x:String>
+  <x:String x:Key="SettingsSectionEmpty">No settings yet.</x:String>
+  <x:String x:Key="OpenLogFileButton">Open log file</x:String>
   <x:String x:Key="LogLevelDebug">Debug</x:String>
   <x:String x:Key="LogLevelInfo">Info</x:String>
   <x:String x:Key="LogLevelWarn">Warn</x:String>
