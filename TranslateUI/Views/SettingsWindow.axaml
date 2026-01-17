@@ -19,6 +19,10 @@
                     </DataTemplate>
                 </ComboBox.ItemTemplate>
             </ComboBox>
+
+            <TextBlock Text="{DynamicResource LogFilePathLabel}" />
+            <TextBox Text="{Binding LogFilePath}" />
+            <TextBlock Text="{DynamicResource LogFilePathHint}" FontSize="12" />
         </StackPanel>
         <StackPanel Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Right" Spacing="8">
             <Button Content="{DynamicResource CloseButton}" Click="OnCloseClicked" />

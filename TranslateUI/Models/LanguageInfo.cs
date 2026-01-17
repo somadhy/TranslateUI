@@ -13,4 +13,6 @@ public sealed class LanguageInfo
     public string Name { get; }
 
     public string DisplayName => $"{Name} ({Code})";
+
+    public override string ToString() => DisplayName;
 }

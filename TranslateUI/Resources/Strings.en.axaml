@@ -22,6 +22,8 @@
   <x:String x:Key="OpenResultButton">Open result</x:String>
   <x:String x:Key="DownloadModelButton">Download model</x:String>
   <x:String x:Key="LogLevelLabel">Logging level</x:String>
+  <x:String x:Key="LogFilePathLabel">Log file path</x:String>
+  <x:String x:Key="LogFilePathHint">Change applies after restart.</x:String>
   <x:String x:Key="SettingsButton">Settings</x:String>
   <x:String x:Key="SettingsTitle">Settings</x:String>
   <x:String x:Key="CloseButton">Close</x:String>
@@ -63,4 +65,5 @@
   <x:String x:Key="TooltipBrowseOutput">Choose output path</x:String>
   <x:String x:Key="TooltipTranslateFile">Translate selected file</x:String>
   <x:String x:Key="TooltipOpenResult">Open translated file</x:String>
+  <x:String x:Key="TooltipSwapLanguages">Swap source and target languages</x:String>
 </ResourceDictionary>

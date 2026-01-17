@@ -4,6 +4,7 @@ using Avalonia.Data.Core;
 using Avalonia.Data.Core.Plugins;
 using System.Linq;
 using System;
+using System.Threading.Tasks;
 using System.Net.Http;
 using Avalonia.Markup.Xaml;
 using Microsoft.Extensions.DependencyInjection;
@@ -37,8 +38,10 @@ public partial class App : Application
             var settingsService = Services.GetRequiredService<ISettingsService>();
             var loggingService = Services.GetRequiredService<ILoggingService>();
             var settings = settingsService.Load();
+            loggingService.SetLogFilePath(settings.LogFilePath);
             loggingService.SetMinimumLevel(settings.LogLevel);
             logger.LogInformation("Application starting");
+            RegisterUnhandledExceptionLogging(logger);
 
             var localization = Services.GetRequiredService<ILocalizationService>();
             localization.SetLanguage(settings.UiLanguage);
@@ -62,6 +65,27 @@ public partial class App : Application
         {
             BindingPlugins.DataValidators.Remove(plugin);
         }
+    }
+
+    private static void RegisterUnhandledExceptionLogging(ILogger logger)
+    {
+        AppDomain.CurrentDomain.UnhandledException += (_, args) =>
+        {
+            if (args.ExceptionObject is Exception exception)
+            {
+                logger.LogError(exception, "Unhandled exception");
+            }
+            else
+            {
+                logger.LogError("Unhandled exception: {Exception}", args.ExceptionObject);
+            }
+        };
+
+        TaskScheduler.UnobservedTaskException += (_, args) =>
+        {
+            logger.LogError(args.Exception, "Unobserved task exception");
+            args.SetObserved();
+        };
     }
 
     private ServiceProvider ConfigureServices()

@@ -27,12 +27,16 @@ public partial class SettingsWindowViewModel : ViewModelBase
 
         var current = _settingsService.Current.LogLevel;
         SelectedLogLevel = FindOption(current);
+        LogFilePath = _settingsService.Current.LogFilePath;
     }
 
     public ObservableCollection<LogLevelOption> LogLevels { get; }
 
     [ObservableProperty]
     private LogLevelOption selectedLogLevel;
+
+    [ObservableProperty]
+    private string logFilePath = string.Empty;
 
     partial void OnSelectedLogLevelChanged(LogLevelOption value)
     {
@@ -43,6 +47,18 @@ public partial class SettingsWindowViewModel : ViewModelBase
 
         _loggingService.SetMinimumLevel(value.Value);
         _settingsService.UpdateLogLevel(value.Value);
+    }
+
+    partial void OnLogFilePathChanged(string value)
+    {
+        if (string.IsNullOrWhiteSpace(value))
+        {
+            return;
+        }
+
+        _settingsService.Current.LogFilePath = value;
+        _settingsService.Save();
+        _loggingService.SetLogFilePath(value);
     }
 
     private LogLevelOption FindOption(LogLevel level)

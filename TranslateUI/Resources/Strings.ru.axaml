@@ -22,6 +22,8 @@
   <x:String x:Key="OpenResultButton">Открыть результат</x:String>
   <x:String x:Key="DownloadModelButton">Скачать модель</x:String>
   <x:String x:Key="LogLevelLabel">Уровень логирования</x:String>
+  <x:String x:Key="LogFilePathLabel">Путь к логам</x:String>
+  <x:String x:Key="LogFilePathHint">Изменения применятся после перезапуска.</x:String>
   <x:String x:Key="SettingsButton">Настройки</x:String>
   <x:String x:Key="SettingsTitle">Настройки</x:String>
   <x:String x:Key="CloseButton">Закрыть</x:String>
@@ -63,4 +65,5 @@
   <x:String x:Key="TooltipBrowseOutput">Выбрать путь сохранения</x:String>
   <x:String x:Key="TooltipTranslateFile">Перевести файл</x:String>
   <x:String x:Key="TooltipOpenResult">Открыть результат</x:String>
+  <x:String x:Key="TooltipSwapLanguages">Поменять языки местами</x:String>
 </ResourceDictionary>

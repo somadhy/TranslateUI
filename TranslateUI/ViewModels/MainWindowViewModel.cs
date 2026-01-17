@@ -2,9 +2,12 @@ namespace TranslateUI.ViewModels;
 
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.Linq;
 using System.Diagnostics;
 using System.IO;
 using System.Threading.Tasks;
+using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Microsoft.Extensions.Logging;
@@ -20,6 +23,8 @@ public partial class MainWindowViewModel : ViewModelBase
     private readonly IFileDialogService _fileDialogService;
     private readonly ILanguageService _languageService;
     private readonly ISettingsService _settingsService;
+    private bool _suppressLanguageUsage;
+    private bool _pendingLanguageOrderUpdate;
 
     public MainWindowViewModel(
         ILogger<MainWindowViewModel> logger,
@@ -43,8 +48,12 @@ public partial class MainWindowViewModel : ViewModelBase
         BrowseOutputCommand = new AsyncRelayCommand(BrowseOutputAsync, () => !IsBusy);
         OpenOutputCommand = new AsyncRelayCommand(OpenOutputAsync, CanOpenOutput);
         DownloadModelCommand = new AsyncRelayCommand(DownloadSelectedModelAsync, CanDownloadSelectedModel);
-        Languages = _languageService.Languages;
+        SwapLanguagesCommand = new RelayCommand(SwapLanguages, () => !IsBusy);
+        _allLanguages = _languageService.Languages.ToList();
+        Languages = new ObservableCollection<LanguageInfo>(GetOrderedLanguages());
+        _suppressLanguageUsage = true;
         InitializeLanguages();
+        _suppressLanguageUsage = false;
         InitializeModelSelection();
         _ = RefreshModelAvailabilityAsync();
         _logger.LogDebug("MainWindowViewModel initialized");
@@ -62,7 +71,9 @@ public partial class MainWindowViewModel : ViewModelBase
 
     public IAsyncRelayCommand DownloadModelCommand { get; }
 
-    public IReadOnlyList<LanguageInfo> Languages { get; }
+    public IRelayCommand SwapLanguagesCommand { get; }
+
+    public ObservableCollection<LanguageInfo> Languages { get; }
 
     [ObservableProperty]
     private string sourceText = string.Empty;
@@ -120,9 +131,13 @@ public partial class MainWindowViewModel : ViewModelBase
         "translategemma:27b"
     };
 
+    private readonly List<LanguageInfo> _allLanguages;
+
     public string SelectedModelName => GetSelectedModelName();
 
     public bool IsModelMissing => IsModelAvailabilityKnown && !IsSelectedModelAvailable;
+
+    public Func<string, object?, bool> FilterLanguage => FilterLanguageItem;
 
     private bool CanTranslate() => !IsBusy && !string.IsNullOrWhiteSpace(SourceText);
 
@@ -315,6 +330,99 @@ public partial class MainWindowViewModel : ViewModelBase
         }
     }
 
+    private IReadOnlyList<LanguageInfo> GetOrderedLanguages()
+    {
+        var counts = GetUsageCounts();
+        var topLanguages = _allLanguages
+            .Select(lang => new { Language = lang, Count = GetUsageCount(counts, lang.Code) })
+            .Where(entry => entry.Count > 0)
+            .OrderByDescending(entry => entry.Count)
+            .ThenBy(entry => entry.Language.Name, StringComparer.OrdinalIgnoreCase)
+            .Take(3)
+            .Select(entry => entry.Language)
+            .ToList();
+
+        var topSet = new HashSet<string>(topLanguages.Select(lang => lang.Code), StringComparer.OrdinalIgnoreCase);
+        var rest = _allLanguages
+            .Where(lang => !topSet.Contains(lang.Code))
+            .OrderBy(lang => lang.Name, StringComparer.OrdinalIgnoreCase)
+            .ToList();
+
+        topLanguages.AddRange(rest);
+        return topLanguages;
+    }
+
+    private void UpdateLanguageOrdering()
+    {
+        var ordered = GetOrderedLanguages();
+        Languages.Clear();
+        foreach (var language in ordered)
+        {
+            Languages.Add(language);
+        }
+    }
+
+    private void IncrementLanguageUsage(string code)
+    {
+        var normalized = code.ToLowerInvariant();
+        var counts = GetUsageCounts();
+        if (!counts.TryGetValue(normalized, out var count))
+        {
+            count = 0;
+        }
+
+        counts[normalized] = count + 1;
+        _settingsService.Save();
+        ScheduleLanguageOrderUpdate();
+    }
+
+    private static int GetUsageCount(Dictionary<string, int> counts, string code)
+    {
+        var normalized = code.ToLowerInvariant();
+        return counts.TryGetValue(normalized, out var count) ? count : 0;
+    }
+
+    private Dictionary<string, int> GetUsageCounts()
+    {
+        var settings = _settingsService.Current;
+        if (settings.LanguageUsageCounts is null)
+        {
+            settings.LanguageUsageCounts = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase);
+        }
+
+        return settings.LanguageUsageCounts;
+    }
+
+    private void ScheduleLanguageOrderUpdate()
+    {
+        if (_pendingLanguageOrderUpdate)
+        {
+            return;
+        }
+
+        _pendingLanguageOrderUpdate = true;
+        Dispatcher.UIThread.Post(() =>
+        {
+            _pendingLanguageOrderUpdate = false;
+            UpdateLanguageOrdering();
+        }, DispatcherPriority.Background);
+    }
+
+    private bool FilterLanguageItem(string? search, object? item)
+    {
+        if (item is not LanguageInfo language)
+        {
+            return false;
+        }
+
+        if (string.IsNullOrWhiteSpace(search))
+        {
+            return true;
+        }
+
+        return language.DisplayName.StartsWith(search, StringComparison.OrdinalIgnoreCase);
+    }
+
     private void InitializeModelSelection()
     {
         var settings = _settingsService.Current;
@@ -366,8 +474,14 @@ public partial class MainWindowViewModel : ViewModelBase
             return;
         }
 
+        if (_suppressLanguageUsage)
+        {
+            return;
+        }
+
         _settingsService.Current.DefaultSourceLang = value.Code;
         _settingsService.Save();
+        IncrementLanguageUsage(value.Code);
     }
 
     partial void OnSelectedTargetLanguageChanged(LanguageInfo? value)
@@ -377,8 +491,14 @@ public partial class MainWindowViewModel : ViewModelBase
             return;
         }
 
+        if (_suppressLanguageUsage)
+        {
+            return;
+        }
+
         _settingsService.Current.DefaultTargetLang = value.Code;
         _settingsService.Save();
+        IncrementLanguageUsage(value.Code);
     }
 
     partial void OnSelectedModelIndexChanged(int value)
@@ -410,11 +530,39 @@ public partial class MainWindowViewModel : ViewModelBase
         BrowseOutputCommand.NotifyCanExecuteChanged();
         OpenOutputCommand.NotifyCanExecuteChanged();
         DownloadModelCommand.NotifyCanExecuteChanged();
+        SwapLanguagesCommand.NotifyCanExecuteChanged();
     }
 
     partial void OnIsModelDownloadingChanged(bool value)
     {
         DownloadModelCommand.NotifyCanExecuteChanged();
+    }
+
+    private void SwapLanguages()
+    {
+        _suppressLanguageUsage = true;
+        try
+        {
+            (SelectedSourceLanguage, SelectedTargetLanguage) = (SelectedTargetLanguage, SelectedSourceLanguage);
+        }
+        finally
+        {
+            _suppressLanguageUsage = false;
+        }
+
+        if (SelectedSourceLanguage is not null)
+        {
+            _settingsService.Current.DefaultSourceLang = SelectedSourceLanguage.Code;
+            IncrementLanguageUsage(SelectedSourceLanguage.Code);
+        }
+
+        if (SelectedTargetLanguage is not null)
+        {
+            _settingsService.Current.DefaultTargetLang = SelectedTargetLanguage.Code;
+            IncrementLanguageUsage(SelectedTargetLanguage.Code);
+        }
+
+        _settingsService.Save();
     }
 
     partial void OnErrorMessageKeyChanged(string? value)

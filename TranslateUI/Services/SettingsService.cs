@@ -58,6 +58,12 @@ public sealed class SettingsService : ISettingsService
             _logger.LogWarning(ex, "Failed to load settings, using defaults");
         }
 
+        if (string.IsNullOrWhiteSpace(Current.LogFilePath))
+        {
+            Current.LogFilePath = LoggingService.GetDefaultLogFilePath();
+            Save();
+        }
+
         return Current;
     }
 

@@ -17,7 +17,7 @@
     </Design.DataContext>
 
     <Grid RowDefinitions="Auto,Auto,*" Margin="16">
-        <Grid ColumnDefinitions="Auto,Auto,Auto,*" ColumnSpacing="16">
+        <Grid ColumnDefinitions="Auto,Auto,Auto,Auto,*" ColumnSpacing="12">
             <Button Content="{DynamicResource SettingsButton}"
                     Width="140"
                     ToolTip.Tip="{DynamicResource TooltipSettings}"
@@ -27,35 +27,48 @@
                 <TextBlock Text="{DynamicResource SourceLanguageLabel}"
                            VerticalAlignment="Center"
                            ToolTip.Tip="{DynamicResource TooltipSourceLanguage}" />
-                <ComboBox ItemsSource="{Binding Languages}"
-                          SelectedItem="{Binding SelectedSourceLanguage}"
-                          Width="200"
-                          ToolTip.Tip="{DynamicResource TooltipSourceLanguage}">
-                    <ComboBox.ItemTemplate>
+                <AutoCompleteBox ItemsSource="{Binding Languages}"
+                                 SelectedItem="{Binding SelectedSourceLanguage}"
+                                 Width="220"
+                                 MinimumPrefixLength="1"
+                                 FilterMode="StartsWith"
+                                 TextFilter="{Binding FilterLanguage}"
+                                 ToolTip.Tip="{DynamicResource TooltipSourceLanguage}">
+                    <AutoCompleteBox.ItemTemplate>
                         <DataTemplate>
-                            <TextBlock Text="{Binding DisplayName}" />
+                            <TextBlock Text="{Binding}" />
                         </DataTemplate>
-                    </ComboBox.ItemTemplate>
-                </ComboBox>
+                    </AutoCompleteBox.ItemTemplate>
+                </AutoCompleteBox>
             </StackPanel>
 
-            <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+            <Button Grid.Column="2"
+                    Width="36"
+                    Height="32"
+                    Content="↔"
+                    ToolTip.Tip="{DynamicResource TooltipSwapLanguages}"
+                    Command="{Binding SwapLanguagesCommand}" />
+
+            <StackPanel Grid.Column="3" Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
                 <TextBlock Text="{DynamicResource TargetLanguageLabel}"
                            VerticalAlignment="Center"
                            ToolTip.Tip="{DynamicResource TooltipTargetLanguage}" />
-                <ComboBox ItemsSource="{Binding Languages}"
-                          SelectedItem="{Binding SelectedTargetLanguage}"
-                          Width="200"
-                          ToolTip.Tip="{DynamicResource TooltipTargetLanguage}">
-                    <ComboBox.ItemTemplate>
+                <AutoCompleteBox ItemsSource="{Binding Languages}"
+                                 SelectedItem="{Binding SelectedTargetLanguage}"
+                                 Width="220"
+                                 MinimumPrefixLength="1"
+                                 FilterMode="StartsWith"
+                                 TextFilter="{Binding FilterLanguage}"
+                                 ToolTip.Tip="{DynamicResource TooltipTargetLanguage}">
+                    <AutoCompleteBox.ItemTemplate>
                         <DataTemplate>
-                            <TextBlock Text="{Binding DisplayName}" />
+                            <TextBlock Text="{Binding}" />
                         </DataTemplate>
-                    </ComboBox.ItemTemplate>
-                </ComboBox>
+                    </AutoCompleteBox.ItemTemplate>
+                </AutoCompleteBox>
             </StackPanel>
 
-            <StackPanel Grid.Column="3" Spacing="6">
+            <StackPanel Grid.Column="4" Spacing="6">
                 <TextBlock Text="{DynamicResource ModelLabel}"
                            ToolTip.Tip="{DynamicResource TooltipModelSlider}" />
                 <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="8">

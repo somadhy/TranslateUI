@@ -9,21 +9,27 @@ namespace TranslateUI.Services;
 public interface ILoggingService
 {
     Serilog.ILogger Logger { get; }
+    string LogFilePath { get; }
     void SetMinimumLevel(Microsoft.Extensions.Logging.LogLevel level);
+    void SetLogFilePath(string path);
 }
 
 public sealed class LoggingService : ILoggingService
 {
     private readonly LoggingLevelSwitch _levelSwitch;
-    private readonly Serilog.ILogger _logger;
+    private Serilog.ILogger _logger;
+    private string _logFilePath;
 
     public LoggingService()
     {
         _levelSwitch = new LoggingLevelSwitch(LogEventLevel.Debug);
+        _logFilePath = GetDefaultLogFilePath();
         _logger = CreateLogger();
     }
 
     public Serilog.ILogger Logger => _logger;
+
+    public string LogFilePath => _logFilePath;
 
     public void SetMinimumLevel(Microsoft.Extensions.Logging.LogLevel level)
     {
@@ -31,23 +37,50 @@ public sealed class LoggingService : ILoggingService
         _logger.Information("Log level set to {LogLevel}", level);
     }
 
+    public void SetLogFilePath(string path)
+    {
+        var nextPath = string.IsNullOrWhiteSpace(path) ? GetDefaultLogFilePath() : path;
+        if (string.Equals(nextPath, _logFilePath, StringComparison.OrdinalIgnoreCase))
+        {
+            return;
+        }
+
+        if (_logger is IDisposable disposable)
+        {
+            disposable.Dispose();
+        }
+
+        _logFilePath = nextPath;
+        _logger = CreateLogger();
+        _logger.Information("Log file path set to {LogPath}", _logFilePath);
+    }
+
     private Serilog.ILogger CreateLogger()
     {
-        var logDir = Path.Combine(
-            Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
-            "TranslateUI",
-            "logs");
-        Directory.CreateDirectory(logDir);
+        var logDir = Path.GetDirectoryName(_logFilePath);
+        if (!string.IsNullOrWhiteSpace(logDir))
+        {
+            Directory.CreateDirectory(logDir);
+        }
 
         return new LoggerConfiguration()
             .MinimumLevel.ControlledBy(_levelSwitch)
             .Enrich.FromLogContext()
             .WriteTo.File(
-                path: Path.Combine(logDir, "app-.log"),
+                path: _logFilePath,
                 rollingInterval: RollingInterval.Day,
                 retainedFileCountLimit: 10,
                 restrictedToMinimumLevel: LogEventLevel.Verbose)
             .CreateLogger();
+    }
+
+    public static string GetDefaultLogFilePath()
+    {
+        var logDir = Path.Combine(
+            Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
+            "TranslateUI",
+            "logs");
+        return Path.Combine(logDir, "app-.log");
     }
 
     private static LogEventLevel MapLevel(Microsoft.Extensions.Logging.LogLevel level) =>
@@ -59,7 +92,7 @@ public sealed class LoggingService : ILoggingService
             Microsoft.Extensions.Logging.LogLevel.Warning => LogEventLevel.Warning,
             Microsoft.Extensions.Logging.LogLevel.Error => LogEventLevel.Error,
             Microsoft.Extensions.Logging.LogLevel.Critical => LogEventLevel.Fatal,
-            Microsoft.Extensions.Logging.LogLevel.None => LogEventLevel.Fatal,
+            Microsoft.Extensions.Logging.LogLevel.None => LogEventLevel.Error,
             _ => LogEventLevel.Information
         };
 }

@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using Microsoft.Extensions.Logging;
 
 namespace TranslateUI.Models;
@@ -10,4 +11,6 @@ public sealed class AppSettings
     public string OllamaUrl { get; set; } = "http://localhost:11434";
     public string DefaultModel { get; set; } = "translategemma:4b";
     public LogLevel LogLevel { get; set; } = LogLevel.Debug;
+    public string LogFilePath { get; set; } = string.Empty;
+    public Dictionary<string, int>? LanguageUsageCounts { get; set; } = new();
 }
