@@ -5,6 +5,8 @@ using Avalonia.Data.Core.Plugins;
 using System.Linq;
 using Avalonia.Markup.Xaml;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
+using Serilog.Extensions.Logging;
 using TranslateUI.Services;
 using TranslateUI.ViewModels;
 using TranslateUI.Views;
@@ -29,8 +31,15 @@ public partial class App : Application
             DisableAvaloniaDataAnnotationValidation();
 
             Services = ConfigureServices();
+            var logger = Services.GetRequiredService<ILogger<App>>();
+            var settingsService = Services.GetRequiredService<ISettingsService>();
+            var loggingService = Services.GetRequiredService<ILoggingService>();
+            var settings = settingsService.Load();
+            loggingService.SetMinimumLevel(settings.LogLevel);
+            logger.LogInformation("Application starting");
+
             var localization = Services.GetRequiredService<ILocalizationService>();
-            localization.SetLanguage("en");
+            localization.SetLanguage(settings.UiLanguage);
 
             var mainWindow = Services.GetRequiredService<MainWindow>();
             mainWindow.DataContext = Services.GetRequiredService<MainWindowViewModel>();
@@ -56,7 +65,17 @@ public partial class App : Application
     private ServiceProvider ConfigureServices()
     {
         var services = new ServiceCollection();
-        services.AddSingleton<ILocalizationService>(new LocalizationService(this));
+        var loggingService = new LoggingService();
+        services.AddSingleton<ILoggingService>(loggingService);
+        services.AddLogging(builder =>
+        {
+            builder.ClearProviders();
+            builder.SetMinimumLevel(LogLevel.Trace);
+            builder.AddProvider(new SerilogLoggerProvider(loggingService.Logger, dispose: true));
+        });
+        services.AddSingleton<ISettingsService, SettingsService>();
+        services.AddSingleton<ILocalizationService>(sp =>
+            new LocalizationService(this, sp.GetRequiredService<ILogger<LocalizationService>>()));
         services.AddSingleton<MainWindow>();
         services.AddSingleton<MainWindowViewModel>();
         return services.BuildServiceProvider();

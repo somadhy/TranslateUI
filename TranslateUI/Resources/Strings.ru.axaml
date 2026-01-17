@@ -3,4 +3,5 @@
   <x:String x:Key="AppTitle">TranslateUI</x:String>
   <x:String x:Key="WelcomeText">Добро пожаловать в TranslateUI</x:String>
   <x:String x:Key="TranslateButton">Перевод</x:String>
+  <x:String x:Key="LogLevelLabel">Уровень логирования</x:String>
 </ResourceDictionary>

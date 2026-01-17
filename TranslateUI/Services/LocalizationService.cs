@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Markup.Xaml.Styling;
+using Microsoft.Extensions.Logging;
 
 namespace TranslateUI.Services;
 
@@ -15,15 +16,17 @@ public interface ILocalizationService
 public sealed class LocalizationService : ILocalizationService
 {
     private readonly Application _application;
+    private readonly ILogger<LocalizationService> _logger;
     private readonly Dictionary<string, Uri> _resourceMap = new(StringComparer.OrdinalIgnoreCase)
     {
         ["en"] = new Uri("avares://TranslateUI/Resources/Strings.en.axaml"),
         ["ru"] = new Uri("avares://TranslateUI/Resources/Strings.ru.axaml"),
     };
 
-    public LocalizationService(Application application)
+    public LocalizationService(Application application, ILogger<LocalizationService> logger)
     {
         _application = application;
+        _logger = logger;
         CurrentLanguage = "en";
     }
 
@@ -50,5 +53,6 @@ public sealed class LocalizationService : ILocalizationService
         }
 
         CurrentLanguage = languageCode;
+        _logger.LogDebug("UI language set to {Language}", languageCode);
     }
 }
