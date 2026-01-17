@@ -5,6 +5,8 @@
   <x:String x:Key="TranslateButton">Translate</x:String>
   <x:String x:Key="TextTabHeader">Text</x:String>
   <x:String x:Key="FileTabHeader">File</x:String>
+  <x:String x:Key="SourceLanguageLabel">From</x:String>
+  <x:String x:Key="TargetLanguageLabel">To</x:String>
   <x:String x:Key="SourceTextLabel">Source</x:String>
   <x:String x:Key="ResultTextLabel">Result</x:String>
   <x:String x:Key="SourceTextPlaceholder">Enter text to translate...</x:String>

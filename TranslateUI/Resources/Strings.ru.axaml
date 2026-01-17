@@ -5,6 +5,8 @@
   <x:String x:Key="TranslateButton">Перевод</x:String>
   <x:String x:Key="TextTabHeader">Текст</x:String>
   <x:String x:Key="FileTabHeader">Файл</x:String>
+  <x:String x:Key="SourceLanguageLabel">С языка</x:String>
+  <x:String x:Key="TargetLanguageLabel">На язык</x:String>
   <x:String x:Key="SourceTextLabel">Исходный текст</x:String>
   <x:String x:Key="ResultTextLabel">Результат</x:String>
   <x:String x:Key="SourceTextPlaceholder">Введите текст для перевода...</x:String>

@@ -1,8 +1,9 @@
 namespace TranslateUI.ViewModels;
 
 using System;
-using System.IO;
+using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
@@ -16,6 +17,7 @@ public partial class MainWindowViewModel : ViewModelBase
     private readonly ITranslationService _translationService;
     private readonly IFileTranslationService _fileTranslationService;
     private readonly IFileDialogService _fileDialogService;
+    private readonly ILanguageService _languageService;
     private readonly ISettingsService _settingsService;
 
     public MainWindowViewModel(
@@ -23,18 +25,22 @@ public partial class MainWindowViewModel : ViewModelBase
         ITranslationService translationService,
         IFileTranslationService fileTranslationService,
         IFileDialogService fileDialogService,
+        ILanguageService languageService,
         ISettingsService settingsService)
     {
         _logger = logger;
         _translationService = translationService;
         _fileTranslationService = fileTranslationService;
         _fileDialogService = fileDialogService;
+        _languageService = languageService;
         _settingsService = settingsService;
         TranslateCommand = new AsyncRelayCommand(TranslateAsync, CanTranslate);
         TranslateFileCommand = new AsyncRelayCommand(TranslateFileAsync, CanTranslateFile);
         BrowseInputCommand = new AsyncRelayCommand(BrowseInputAsync, () => !IsBusy);
         BrowseOutputCommand = new AsyncRelayCommand(BrowseOutputAsync, () => !IsBusy);
         OpenOutputCommand = new AsyncRelayCommand(OpenOutputAsync, CanOpenOutput);
+        Languages = _languageService.Languages;
+        InitializeLanguages();
         _logger.LogDebug("MainWindowViewModel initialized");
     }
 
@@ -47,6 +53,8 @@ public partial class MainWindowViewModel : ViewModelBase
     public IAsyncRelayCommand BrowseOutputCommand { get; }
 
     public IAsyncRelayCommand OpenOutputCommand { get; }
+
+    public IReadOnlyList<LanguageInfo> Languages { get; }
 
     [ObservableProperty]
     private string sourceText = string.Empty;
@@ -73,6 +81,12 @@ public partial class MainWindowViewModel : ViewModelBase
     [ObservableProperty]
     private string outputFilePath = string.Empty;
 
+    [ObservableProperty]
+    private LanguageInfo? selectedSourceLanguage;
+
+    [ObservableProperty]
+    private LanguageInfo? selectedTargetLanguage;
+
     private bool CanTranslate() => !IsBusy && !string.IsNullOrWhiteSpace(SourceText);
 
     private bool CanTranslateFile() =>
@@ -92,8 +106,8 @@ public partial class MainWindowViewModel : ViewModelBase
             var settings = _settingsService.Current;
             var request = new TranslationRequest(
                 SourceText,
-                settings.DefaultSourceLang,
-                settings.DefaultTargetLang,
+                SelectedSourceLanguage?.Code ?? settings.DefaultSourceLang,
+                SelectedTargetLanguage?.Code ?? settings.DefaultTargetLang,
                 settings.DefaultModel);
 
             var result = await _translationService.TranslateAsync(request);
@@ -121,7 +135,11 @@ public partial class MainWindowViewModel : ViewModelBase
 
         try
         {
-            var result = await _fileTranslationService.TranslateFileAsync(InputFilePath, OutputFilePath);
+            var result = await _fileTranslationService.TranslateFileAsync(
+                InputFilePath,
+                OutputFilePath,
+                SelectedSourceLanguage?.Code,
+                SelectedTargetLanguage?.Code);
             if (result.IsSuccess)
             {
                 OutputFilePath = result.OutputPath ?? OutputFilePath;
@@ -195,9 +213,53 @@ public partial class MainWindowViewModel : ViewModelBase
         return Path.Combine(directory, fileName);
     }
 
+    private void InitializeLanguages()
+    {
+        var settings = _settingsService.Current;
+        if (_languageService.TryGetByCode(settings.DefaultSourceLang, out var source))
+        {
+            SelectedSourceLanguage = source;
+        }
+        else if (Languages.Count > 0)
+        {
+            SelectedSourceLanguage = Languages[0];
+        }
+
+        if (_languageService.TryGetByCode(settings.DefaultTargetLang, out var target))
+        {
+            SelectedTargetLanguage = target;
+        }
+        else if (Languages.Count > 0)
+        {
+            SelectedTargetLanguage = Languages[0];
+        }
+    }
+
     partial void OnSourceTextChanged(string value)
     {
         TranslateCommand.NotifyCanExecuteChanged();
+    }
+
+    partial void OnSelectedSourceLanguageChanged(LanguageInfo? value)
+    {
+        if (value is null)
+        {
+            return;
+        }
+
+        _settingsService.Current.DefaultSourceLang = value.Code;
+        _settingsService.Save();
+    }
+
+    partial void OnSelectedTargetLanguageChanged(LanguageInfo? value)
+    {
+        if (value is null)
+        {
+            return;
+        }
+
+        _settingsService.Current.DefaultTargetLang = value.Code;
+        _settingsService.Save();
     }
 
     partial void OnInputFilePathChanged(string value)

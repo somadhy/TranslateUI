@@ -11,4 +11,6 @@ public sealed class LanguageInfo
     public string Code { get; }
 
     public string Name { get; }
+
+    public string DisplayName => $"{Name} ({Code})";
 }

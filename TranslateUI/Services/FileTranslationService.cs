@@ -13,6 +13,8 @@ public interface IFileTranslationService
     Task<FileTranslationResult> TranslateFileAsync(
         string inputPath,
         string outputPath,
+        string? sourceLanguageCode,
+        string? targetLanguageCode,
         CancellationToken cancellationToken = default);
 }
 
@@ -38,6 +40,8 @@ public sealed class FileTranslationService : IFileTranslationService
     public async Task<FileTranslationResult> TranslateFileAsync(
         string inputPath,
         string outputPath,
+        string? sourceLanguageCode,
+        string? targetLanguageCode,
         CancellationToken cancellationToken = default)
     {
         if (string.IsNullOrWhiteSpace(inputPath))
@@ -68,8 +72,8 @@ public sealed class FileTranslationService : IFileTranslationService
             var settings = _settingsService.Current;
             var request = new TranslationRequest(
                 sourceText,
-                settings.DefaultSourceLang,
-                settings.DefaultTargetLang,
+                sourceLanguageCode ?? settings.DefaultSourceLang,
+                targetLanguageCode ?? settings.DefaultTargetLang,
                 settings.DefaultModel);
 
             var result = await _translationService.TranslateAsync(request, cancellationToken);
