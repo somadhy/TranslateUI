@@ -10,7 +10,7 @@ public sealed class AppSettings
     public string DefaultTargetLang { get; set; } = "ru";
     public string OllamaUrl { get; set; } = "http://localhost:11434";
     public string DefaultModel { get; set; } = "translategemma:4b";
-    public LogLevel LogLevel { get; set; } = LogLevel.Debug;
+    public LogLevel LogLevel { get; set; } = LogLevel.Error;
     public string LogFilePath { get; set; } = string.Empty;
     public Dictionary<string, int>? LanguageUsageCounts { get; set; } = new();
 }
