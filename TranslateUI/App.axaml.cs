@@ -86,6 +86,10 @@ public partial class App : Application
         services.AddSingleton<IPromptBuilder, PromptBuilder>();
         services.AddSingleton<IOllamaClient, OllamaClient>();
         services.AddSingleton<ITranslationService, TranslationService>();
+        services.AddSingleton<IFileDialogService>(_ =>
+            new FileDialogService((IClassicDesktopStyleApplicationLifetime)ApplicationLifetime!));
+        services.AddSingleton<IFileHandler, TxtMdFileHandler>();
+        services.AddSingleton<IFileTranslationService, FileTranslationService>();
         services.AddSingleton<MainWindow>();
         services.AddSingleton<MainWindowViewModel>();
         services.AddSingleton<SettingsWindow>();

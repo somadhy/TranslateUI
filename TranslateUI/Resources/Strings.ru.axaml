@@ -3,10 +3,16 @@
   <x:String x:Key="AppTitle">TranslateUI</x:String>
   <x:String x:Key="WelcomeText">Добро пожаловать в TranslateUI</x:String>
   <x:String x:Key="TranslateButton">Перевод</x:String>
+  <x:String x:Key="TextTabHeader">Текст</x:String>
+  <x:String x:Key="FileTabHeader">Файл</x:String>
   <x:String x:Key="SourceTextLabel">Исходный текст</x:String>
   <x:String x:Key="ResultTextLabel">Результат</x:String>
   <x:String x:Key="SourceTextPlaceholder">Введите текст для перевода...</x:String>
   <x:String x:Key="ResultTextPlaceholder">Здесь появится перевод</x:String>
+  <x:String x:Key="InputFileLabel">Исходный файл</x:String>
+  <x:String x:Key="OutputFileLabel">Путь результата</x:String>
+  <x:String x:Key="BrowseButton">Выбрать</x:String>
+  <x:String x:Key="TranslateFileButton">Перевести файл</x:String>
   <x:String x:Key="LogLevelLabel">Уровень логирования</x:String>
   <x:String x:Key="SettingsButton">Настройки</x:String>
   <x:String x:Key="SettingsTitle">Настройки</x:String>
@@ -21,4 +27,10 @@
   <x:String x:Key="ErrorUnknownTargetLanguage">Целевой язык не поддерживается.</x:String>
   <x:String x:Key="ErrorSameLanguage">Исходный и целевой языки должны отличаться.</x:String>
   <x:String x:Key="ErrorTranslationFailed">Не удалось выполнить перевод. Проверьте соединение с Ollama.</x:String>
+  <x:String x:Key="ErrorFileNotSelected">Выберите файл для перевода.</x:String>
+  <x:String x:Key="ErrorOutputNotSelected">Выберите путь сохранения результата.</x:String>
+  <x:String x:Key="ErrorFileNotFound">Исходный файл не найден.</x:String>
+  <x:String x:Key="ErrorFileUnsupported">Формат файла не поддерживается.</x:String>
+  <x:String x:Key="ErrorFileTranslationFailed">Не удалось перевести файл.</x:String>
+  <x:String x:Key="FileTranslationSuccess">Файл успешно переведен.</x:String>
 </ResourceDictionary>

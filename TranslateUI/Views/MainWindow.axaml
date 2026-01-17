@@ -16,34 +16,73 @@
         <vm:MainWindowViewModel/>
     </Design.DataContext>
 
-    <Grid RowDefinitions="Auto,Auto,*" ColumnDefinitions="*,*" Margin="16">
-        <StackPanel Grid.ColumnSpan="2" Orientation="Horizontal" Spacing="12">
-            <Button Content="{DynamicResource TranslateButton}" Command="{Binding TranslateCommand}" Width="140" />
+    <Grid RowDefinitions="Auto,Auto,*" Margin="16">
+        <StackPanel Orientation="Horizontal" Spacing="12">
             <Button Content="{DynamicResource SettingsButton}" Width="140" Click="OnOpenSettingsClicked" />
         </StackPanel>
 
-        <TextBlock Grid.Row="1"
-                   Grid.ColumnSpan="2"
-                   Text="{Binding ErrorMessageKey, Converter={x:Static conv:ResourceKeyToStringConverter.Instance}}"
-                   Foreground="Tomato"
-                   IsVisible="{Binding HasError}" />
-
-        <StackPanel Grid.Row="2" Grid.Column="0" Spacing="6" Margin="0,8,8,0">
-            <TextBlock Text="{DynamicResource SourceTextLabel}" />
-            <TextBox Text="{Binding SourceText}"
-                     AcceptsReturn="True"
-                     TextWrapping="Wrap"
-                     Watermark="{DynamicResource SourceTextPlaceholder}" />
+        <StackPanel Grid.Row="1" Spacing="4">
+            <TextBlock Text="{Binding ErrorMessageKey, Converter={x:Static conv:ResourceKeyToStringConverter.Instance}}"
+                       Foreground="Tomato"
+                       IsVisible="{Binding HasError}" />
+            <TextBlock Text="{Binding StatusMessageKey, Converter={x:Static conv:ResourceKeyToStringConverter.Instance}}"
+                       Foreground="SeaGreen"
+                       IsVisible="{Binding HasStatus}" />
         </StackPanel>
 
-        <StackPanel Grid.Row="2" Grid.Column="1" Spacing="6" Margin="8,8,0,0">
-            <TextBlock Text="{DynamicResource ResultTextLabel}" />
-            <TextBox Text="{Binding ResultText}"
-                     AcceptsReturn="True"
-                     TextWrapping="Wrap"
-                     IsReadOnly="True"
-                     Watermark="{DynamicResource ResultTextPlaceholder}" />
-        </StackPanel>
+        <TabControl Grid.Row="2">
+            <TabItem Header="{DynamicResource TextTabHeader}">
+                <Grid RowDefinitions="Auto,*" ColumnDefinitions="*,*">
+                    <StackPanel Grid.ColumnSpan="2" Orientation="Horizontal" Spacing="12">
+                        <Button Content="{DynamicResource TranslateButton}" Command="{Binding TranslateCommand}" Width="140" />
+                    </StackPanel>
+
+                    <StackPanel Grid.Row="1" Grid.Column="0" Spacing="6" Margin="0,8,8,0">
+                        <TextBlock Text="{DynamicResource SourceTextLabel}" />
+                        <TextBox Text="{Binding SourceText}"
+                                 AcceptsReturn="True"
+                                 TextWrapping="Wrap"
+                                 Watermark="{DynamicResource SourceTextPlaceholder}" />
+                    </StackPanel>
+
+                    <StackPanel Grid.Row="1" Grid.Column="1" Spacing="6" Margin="8,8,0,0">
+                        <TextBlock Text="{DynamicResource ResultTextLabel}" />
+                        <TextBox Text="{Binding ResultText}"
+                                 AcceptsReturn="True"
+                                 TextWrapping="Wrap"
+                                 IsReadOnly="True"
+                                 Watermark="{DynamicResource ResultTextPlaceholder}" />
+                    </StackPanel>
+                </Grid>
+            </TabItem>
+
+            <TabItem Header="{DynamicResource FileTabHeader}">
+                <Grid RowDefinitions="Auto,Auto,Auto" ColumnDefinitions="Auto,*,Auto" ColumnSpacing="8" RowSpacing="8">
+                    <TextBlock Text="{DynamicResource InputFileLabel}" VerticalAlignment="Center" />
+                    <TextBox Grid.Column="1"
+                             Text="{Binding InputFilePath}"
+                             IsReadOnly="True" />
+                    <Button Grid.Column="2"
+                            Content="{DynamicResource BrowseButton}"
+                            Command="{Binding BrowseInputCommand}" />
+
+                    <TextBlock Grid.Row="1" Text="{DynamicResource OutputFileLabel}" VerticalAlignment="Center" />
+                    <TextBox Grid.Row="1"
+                             Grid.Column="1"
+                             Text="{Binding OutputFilePath}" />
+                    <Button Grid.Row="1"
+                            Grid.Column="2"
+                            Content="{DynamicResource BrowseButton}"
+                            Command="{Binding BrowseOutputCommand}" />
+
+                    <Button Grid.Row="2"
+                            Grid.Column="1"
+                            Content="{DynamicResource TranslateFileButton}"
+                            Width="180"
+                            Command="{Binding TranslateFileCommand}" />
+                </Grid>
+            </TabItem>
+        </TabControl>
     </Grid>
 
 </Window>

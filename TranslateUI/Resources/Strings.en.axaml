@@ -3,10 +3,16 @@
   <x:String x:Key="AppTitle">TranslateUI</x:String>
   <x:String x:Key="WelcomeText">Welcome to TranslateUI</x:String>
   <x:String x:Key="TranslateButton">Translate</x:String>
+  <x:String x:Key="TextTabHeader">Text</x:String>
+  <x:String x:Key="FileTabHeader">File</x:String>
   <x:String x:Key="SourceTextLabel">Source</x:String>
   <x:String x:Key="ResultTextLabel">Result</x:String>
   <x:String x:Key="SourceTextPlaceholder">Enter text to translate...</x:String>
   <x:String x:Key="ResultTextPlaceholder">Translation will appear here</x:String>
+  <x:String x:Key="InputFileLabel">Input file</x:String>
+  <x:String x:Key="OutputFileLabel">Output path</x:String>
+  <x:String x:Key="BrowseButton">Browse</x:String>
+  <x:String x:Key="TranslateFileButton">Translate file</x:String>
   <x:String x:Key="LogLevelLabel">Logging level</x:String>
   <x:String x:Key="SettingsButton">Settings</x:String>
   <x:String x:Key="SettingsTitle">Settings</x:String>
@@ -21,4 +27,10 @@
   <x:String x:Key="ErrorUnknownTargetLanguage">Target language is not supported.</x:String>
   <x:String x:Key="ErrorSameLanguage">Source and target languages must differ.</x:String>
   <x:String x:Key="ErrorTranslationFailed">Translation failed. Check Ollama connection.</x:String>
+  <x:String x:Key="ErrorFileNotSelected">Select a file to translate.</x:String>
+  <x:String x:Key="ErrorOutputNotSelected">Select a destination for the result.</x:String>
+  <x:String x:Key="ErrorFileNotFound">Input file not found.</x:String>
+  <x:String x:Key="ErrorFileUnsupported">File format is not supported.</x:String>
+  <x:String x:Key="ErrorFileTranslationFailed">File translation failed.</x:String>
+  <x:String x:Key="FileTranslationSuccess">File translated successfully.</x:String>
 </ResourceDictionary>
