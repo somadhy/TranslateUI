@@ -15,8 +15,9 @@ Target stack: **.NET 10**, **C# 14**, **Avalonia UI**, **MVVM**. No paid librari
 - **Language selection**: source/target languages based on `translategemma.MD`.
 - **Model selection**: discrete slider (4B, 12B, 27B) with “Speed → Accuracy”.
 - **Model download**: warning if missing, direct download or auto-download before translate.
-- **Clipboard**: full copy/paste support.
-- **Debug logging**: configurable log level in settings.
+- **Clipboard**: paste source, copy/save result.
+- **Tray**: closing hides to tray; menu: Open/Translate/Exit.
+- **Debug logging**: configurable log level and log path in settings.
 
 ## Requirements Snapshot
 - **Supported formats**: PDF, TXT, MD, DOCX, ODT, PNG, JPEG, TIFF.
@@ -28,18 +29,20 @@ Target stack: **.NET 10**, **C# 14**, **Avalonia UI**, **MVVM**. No paid librari
 - Install **.NET 10 SDK** and **Ollama**.
 - Ensure Ollama is running (`http://localhost:11434` by default).
 - Download model if needed: `ollama pull translategemma:4b`.
+- Build: `dotnet build`
+- Test: `dotnet test TranslateUI.Tests/TranslateUI.Tests.csproj`
 
 ## Documentation Map
-- `01-Requirements.md` — functional and non-functional requirements
-- `02-Architecture.md` — MVVM structure, services, patterns
-- `03-UI-UX.md` — layouts, interactions, tray behavior
-- `04-Ollama-Integration.md` — HTTP endpoints, model handling
-- `05-File-Formats.md` — extraction/output strategies
-- `06-Prompting-Languages.md` — prompt format + language list usage
-- `07-Settings-Localization.md` — settings and resources
-- `08-Testing.md` — unit/integration/UI test guidance
-- `09-Security.md` — security and safety checklist
-- `10-Implementation-Plan.md` — phased delivery plan
+- `a1/docs/01-Requirements.md` — functional and non-functional requirements
+- `a1/docs/02-Architecture.md` — MVVM structure, services, patterns
+- `a1/docs/03-UI-UX.md` — layouts, interactions, tray behavior
+- `a1/docs/04-Ollama-Integration.md` — HTTP endpoints, model handling
+- `a1/docs/05-File-Formats.md` — extraction/output strategies
+- `a1/docs/06-Prompting-Languages.md` — prompt format + language list usage
+- `a1/docs/07-Settings-Localization.md` — settings and resources
+- `a1/docs/08-Testing.md` — unit/integration/UI test guidance
+- `a1/docs/09-Security.md` — security and safety checklist
+- `a1/docs/10-Implementation-Plan.md` — phased delivery plan
 
 ## Licensing
 Use only free/open-source libraries.
