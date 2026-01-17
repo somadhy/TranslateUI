@@ -2,6 +2,7 @@ using System;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Linq;
+using System.Reflection;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Microsoft.Extensions.Logging;
@@ -66,6 +67,7 @@ public partial class SettingsWindowViewModel : ViewModelBase
                         ?? ModelOptions[0];
 
         OllamaUrl = _settingsService.Current.OllamaUrl;
+        AppVersion = GetAppVersion();
     }
 
     public ObservableCollection<LogLevelOption> LogLevels { get; }
@@ -75,6 +77,8 @@ public partial class SettingsWindowViewModel : ViewModelBase
     public ObservableCollection<LanguageOption> UiLanguages { get; }
 
     public ObservableCollection<string> ModelOptions { get; }
+
+    public string AppVersion { get; }
 
     [ObservableProperty]
     private LogLevelOption selectedLogLevel;
@@ -215,6 +219,18 @@ public partial class SettingsWindowViewModel : ViewModelBase
     private LanguageInfo? FindLanguage(string code) =>
         LanguageOptions.FirstOrDefault(language =>
             string.Equals(language.Code, code, StringComparison.OrdinalIgnoreCase));
+
+    private static string GetAppVersion()
+    {
+        var assembly = typeof(SettingsWindowViewModel).Assembly;
+        var info = assembly.GetCustomAttribute<AssemblyInformationalVersionAttribute>()?.InformationalVersion;
+        if (!string.IsNullOrWhiteSpace(info))
+        {
+            return info;
+        }
+
+        return assembly.GetName().Version?.ToString() ?? "0.0.0";
+    }
 }
 
 public sealed record LanguageOption(string Code, string DisplayName);

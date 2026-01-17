@@ -1,0 +1,49 @@
+name: build
+
+on:
+  push:
+    branches:
+      - "main"
+      - "dev"
+      - "release/*"
+  pull_request:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "10.0.x"
+
+      - name: Set version from release branch
+        id: version
+        shell: bash
+        run: |
+          BRANCH="${GITHUB_REF_NAME}"
+          if [[ "$BRANCH" == release/v* ]]; then
+            VERSION="${BRANCH#release/v}"
+          elif [[ "$BRANCH" == "main" ]]; then
+            VERSION="main"
+          elif [[ "$BRANCH" == "dev" ]]; then
+            VERSION="dev"
+          else
+            VERSION="0.0.0-dev"
+          fi
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          echo "assembly_version=${VERSION}.0" >> "$GITHUB_OUTPUT"
+
+      - name: Build
+        run: |
+          dotnet build -c Release \
+            -p:Version=${{ steps.version.outputs.version }} \
+            -p:InformationalVersion=${{ steps.version.outputs.version }} \
+            -p:AssemblyVersion=${{ steps.version.outputs.assembly_version }} \
+            -p:FileVersion=${{ steps.version.outputs.assembly_version }}
+
+      - name: Test
+        run: dotnet test TranslateUI.Tests/TranslateUI.Tests.csproj -c Release

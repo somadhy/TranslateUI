@@ -31,6 +31,7 @@
   <x:String x:Key="LogLevelLabel">Logging level</x:String>
   <x:String x:Key="LogFilePathLabel">Log file path</x:String>
   <x:String x:Key="LogFilePathHint">Change applies after restart.</x:String>
+  <x:String x:Key="AppVersionLabel">App version</x:String>
   <x:String x:Key="SettingsButton">Settings</x:String>
   <x:String x:Key="SettingsTitle">Settings</x:String>
   <x:String x:Key="CloseButton">Close</x:String>

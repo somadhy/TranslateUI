@@ -31,6 +31,7 @@
   <x:String x:Key="LogLevelLabel">Уровень логирования</x:String>
   <x:String x:Key="LogFilePathLabel">Путь к логам</x:String>
   <x:String x:Key="LogFilePathHint">Изменения применятся после перезапуска.</x:String>
+  <x:String x:Key="AppVersionLabel">Версия приложения</x:String>
   <x:String x:Key="SettingsButton">Настройки</x:String>
   <x:String x:Key="SettingsTitle">Настройки</x:String>
   <x:String x:Key="CloseButton">Закрыть</x:String>

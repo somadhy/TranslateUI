@@ -85,6 +85,9 @@
                                 Width="160"
                                 Command="{Binding OpenLogFileCommand}" />
                         <TextBlock Text="{DynamicResource LogFilePathHint}" FontSize="12" />
+
+                        <TextBlock Text="{DynamicResource AppVersionLabel}" />
+                        <TextBlock Text="{Binding AppVersion}" />
                     </StackPanel>
                 </Border>
             </StackPanel>
