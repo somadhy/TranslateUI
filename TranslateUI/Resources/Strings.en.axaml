@@ -4,4 +4,12 @@
   <x:String x:Key="WelcomeText">Welcome to TranslateUI</x:String>
   <x:String x:Key="TranslateButton">Translate</x:String>
   <x:String x:Key="LogLevelLabel">Logging level</x:String>
+  <x:String x:Key="SettingsButton">Settings</x:String>
+  <x:String x:Key="SettingsTitle">Settings</x:String>
+  <x:String x:Key="CloseButton">Close</x:String>
+  <x:String x:Key="LogLevelDebug">Debug</x:String>
+  <x:String x:Key="LogLevelInfo">Info</x:String>
+  <x:String x:Key="LogLevelWarn">Warn</x:String>
+  <x:String x:Key="LogLevelError">Error</x:String>
+  <x:String x:Key="LogLevelOff">Off</x:String>
 </ResourceDictionary>

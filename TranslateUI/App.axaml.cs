@@ -78,6 +78,8 @@ public partial class App : Application
             new LocalizationService(this, sp.GetRequiredService<ILogger<LocalizationService>>()));
         services.AddSingleton<MainWindow>();
         services.AddSingleton<MainWindowViewModel>();
+        services.AddSingleton<SettingsWindow>();
+        services.AddSingleton<SettingsWindowViewModel>();
         return services.BuildServiceProvider();
     }
 }

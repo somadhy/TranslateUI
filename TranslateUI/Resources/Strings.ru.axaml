@@ -4,4 +4,12 @@
   <x:String x:Key="WelcomeText">Добро пожаловать в TranslateUI</x:String>
   <x:String x:Key="TranslateButton">Перевод</x:String>
   <x:String x:Key="LogLevelLabel">Уровень логирования</x:String>
+  <x:String x:Key="SettingsButton">Настройки</x:String>
+  <x:String x:Key="SettingsTitle">Настройки</x:String>
+  <x:String x:Key="CloseButton">Закрыть</x:String>
+  <x:String x:Key="LogLevelDebug">Отладка</x:String>
+  <x:String x:Key="LogLevelInfo">Информация</x:String>
+  <x:String x:Key="LogLevelWarn">Предупреждения</x:String>
+  <x:String x:Key="LogLevelError">Ошибки</x:String>
+  <x:String x:Key="LogLevelOff">Выключено</x:String>
 </ResourceDictionary>

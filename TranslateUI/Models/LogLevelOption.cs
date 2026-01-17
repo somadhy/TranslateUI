@@ -4,12 +4,12 @@ namespace TranslateUI.Models;
 
 public sealed class LogLevelOption
 {
-    public LogLevelOption(LogLevel value, string display)
+    public LogLevelOption(LogLevel value, string resourceKey)
     {
         Value = value;
-        Display = display;
+        ResourceKey = resourceKey;
     }
 
     public LogLevel Value { get; }
-    public string Display { get; }
+    public string ResourceKey { get; }
 }
