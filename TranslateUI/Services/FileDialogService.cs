@@ -36,9 +36,17 @@ public sealed class FileDialogService : IFileDialogService
             AllowMultiple = false,
             FileTypeFilter = new List<FilePickerFileType>
             {
+                new("Supported files")
+                {
+                    Patterns = new List<string> { "*.txt", "*.md", "*.pdf", "*.docx", "*.odt" }
+                },
                 new("Text files")
                 {
                     Patterns = new List<string> { "*.txt", "*.md" }
+                },
+                new("Documents")
+                {
+                    Patterns = new List<string> { "*.pdf", "*.docx", "*.odt" }
                 }
             }
         };

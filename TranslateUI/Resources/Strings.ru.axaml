@@ -13,6 +13,7 @@
   <x:String x:Key="OutputFileLabel">Путь результата</x:String>
   <x:String x:Key="BrowseButton">Выбрать</x:String>
   <x:String x:Key="TranslateFileButton">Перевести файл</x:String>
+  <x:String x:Key="OpenResultButton">Открыть результат</x:String>
   <x:String x:Key="LogLevelLabel">Уровень логирования</x:String>
   <x:String x:Key="SettingsButton">Настройки</x:String>
   <x:String x:Key="SettingsTitle">Настройки</x:String>
@@ -33,4 +34,5 @@
   <x:String x:Key="ErrorFileUnsupported">Формат файла не поддерживается.</x:String>
   <x:String x:Key="ErrorFileTranslationFailed">Не удалось перевести файл.</x:String>
   <x:String x:Key="FileTranslationSuccess">Файл успешно переведен.</x:String>
+  <x:String x:Key="ErrorOutputFileNotFound">Файл результата не найден.</x:String>
 </ResourceDictionary>

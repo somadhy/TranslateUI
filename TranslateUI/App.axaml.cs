@@ -89,6 +89,9 @@ public partial class App : Application
         services.AddSingleton<IFileDialogService>(_ =>
             new FileDialogService((IClassicDesktopStyleApplicationLifetime)ApplicationLifetime!));
         services.AddSingleton<IFileHandler, TxtMdFileHandler>();
+        services.AddSingleton<IFileHandler, PdfFileHandler>();
+        services.AddSingleton<IFileHandler, DocxFileHandler>();
+        services.AddSingleton<IFileHandler, OdtFileHandler>();
         services.AddSingleton<IFileTranslationService, FileTranslationService>();
         services.AddSingleton<MainWindow>();
         services.AddSingleton<MainWindowViewModel>();

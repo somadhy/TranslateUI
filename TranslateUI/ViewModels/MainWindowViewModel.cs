@@ -1,6 +1,8 @@
 namespace TranslateUI.ViewModels;
 
+using System;
 using System.IO;
+using System.Diagnostics;
 using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
@@ -32,6 +34,7 @@ public partial class MainWindowViewModel : ViewModelBase
         TranslateFileCommand = new AsyncRelayCommand(TranslateFileAsync, CanTranslateFile);
         BrowseInputCommand = new AsyncRelayCommand(BrowseInputAsync, () => !IsBusy);
         BrowseOutputCommand = new AsyncRelayCommand(BrowseOutputAsync, () => !IsBusy);
+        OpenOutputCommand = new AsyncRelayCommand(OpenOutputAsync, CanOpenOutput);
         _logger.LogDebug("MainWindowViewModel initialized");
     }
 
@@ -42,6 +45,8 @@ public partial class MainWindowViewModel : ViewModelBase
     public IAsyncRelayCommand BrowseInputCommand { get; }
 
     public IAsyncRelayCommand BrowseOutputCommand { get; }
+
+    public IAsyncRelayCommand OpenOutputCommand { get; }
 
     [ObservableProperty]
     private string sourceText = string.Empty;
@@ -72,6 +77,8 @@ public partial class MainWindowViewModel : ViewModelBase
 
     private bool CanTranslateFile() =>
         !IsBusy && !string.IsNullOrWhiteSpace(InputFilePath) && !string.IsNullOrWhiteSpace(OutputFilePath);
+
+    private bool CanOpenOutput() => !IsBusy && File.Exists(OutputFilePath);
 
     private async Task TranslateAsync()
     {
@@ -153,6 +160,32 @@ public partial class MainWindowViewModel : ViewModelBase
         }
     }
 
+    private Task OpenOutputAsync()
+    {
+        if (!File.Exists(OutputFilePath))
+        {
+            ErrorMessageKey = "ErrorOutputFileNotFound";
+            StatusMessageKey = null;
+            return Task.CompletedTask;
+        }
+
+        try
+        {
+            Process.Start(new ProcessStartInfo
+            {
+                FileName = OutputFilePath,
+                UseShellExecute = true
+            });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogWarning(ex, "Failed to open output file");
+            ErrorMessageKey = "ErrorOutputFileNotFound";
+        }
+
+        return Task.CompletedTask;
+    }
+
     private static string BuildDefaultOutputPath(string inputPath)
     {
         var directory = Path.GetDirectoryName(inputPath) ?? string.Empty;
@@ -175,6 +208,7 @@ public partial class MainWindowViewModel : ViewModelBase
     partial void OnOutputFilePathChanged(string value)
     {
         TranslateFileCommand.NotifyCanExecuteChanged();
+        OpenOutputCommand.NotifyCanExecuteChanged();
     }
 
     partial void OnIsBusyChanged(bool value)
@@ -183,6 +217,7 @@ public partial class MainWindowViewModel : ViewModelBase
         TranslateFileCommand.NotifyCanExecuteChanged();
         BrowseInputCommand.NotifyCanExecuteChanged();
         BrowseOutputCommand.NotifyCanExecuteChanged();
+        OpenOutputCommand.NotifyCanExecuteChanged();
     }
 
     partial void OnErrorMessageKeyChanged(string? value)

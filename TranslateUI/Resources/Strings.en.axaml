@@ -13,6 +13,7 @@
   <x:String x:Key="OutputFileLabel">Output path</x:String>
   <x:String x:Key="BrowseButton">Browse</x:String>
   <x:String x:Key="TranslateFileButton">Translate file</x:String>
+  <x:String x:Key="OpenResultButton">Open result</x:String>
   <x:String x:Key="LogLevelLabel">Logging level</x:String>
   <x:String x:Key="SettingsButton">Settings</x:String>
   <x:String x:Key="SettingsTitle">Settings</x:String>
@@ -33,4 +34,5 @@
   <x:String x:Key="ErrorFileUnsupported">File format is not supported.</x:String>
   <x:String x:Key="ErrorFileTranslationFailed">File translation failed.</x:String>
   <x:String x:Key="FileTranslationSuccess">File translated successfully.</x:String>
+  <x:String x:Key="ErrorOutputFileNotFound">Output file not found.</x:String>
 </ResourceDictionary>
