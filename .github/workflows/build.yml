@@ -58,9 +58,13 @@ jobs:
       - name: Test
         run: dotnet test TranslateUI.Tests/TranslateUI.Tests.csproj -c release
 
-      - name: Publish
+      - name: Publish linux
         if: steps.version.outputs.is_release_branch == 'true'
-        run: dotnet publish TranslateUI/TranslateUI.csproj -c release -o publish
+        run: dotnet publish TranslateUI/TranslateUI.csproj -c release -o publish/linux
+
+      - name: Publish windows
+        if: steps.version.outputs.is_release_branch == 'true'
+        run: dotnet publish TranslateUI/TranslateUI.csproj -c release -r win-x64 --self-contained true -o publish/windows
 
       - name: Package release artifact
         id: release_artifact
@@ -69,15 +73,24 @@ jobs:
         run: |
           ARTIFACT_NAME="TranslateUI-${{ steps.version.outputs.version }}"
           echo "artifact_name=$ARTIFACT_NAME" >> "$GITHUB_OUTPUT"
-          cd publish
-          zip -r "../${ARTIFACT_NAME}.zip" .
+          cd publish/linux
+          zip -r "../../${ARTIFACT_NAME}-linux.zip" .
+          cd ../windows
+          zip -r "../../${ARTIFACT_NAME}-windows.zip" .
 
       - name: Upload release artifact
         if: steps.version.outputs.is_release_branch == 'true'
         uses: actions/upload-artifact@v4
         with:
-          name: ${{ steps.release_artifact.outputs.artifact_name }}
-          path: ${{ steps.release_artifact.outputs.artifact_name }}.zip
+          name: ${{ steps.release_artifact.outputs.artifact_name }}-linux
+          path: ${{ steps.release_artifact.outputs.artifact_name }}-linux.zip
+
+      - name: Upload windows artifact
+        if: steps.version.outputs.is_release_branch == 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ steps.release_artifact.outputs.artifact_name }}-windows
+          path: ${{ steps.release_artifact.outputs.artifact_name }}-windows.zip
 
       - name: Publish GitHub release
         if: steps.version.outputs.is_release_branch == 'true'
@@ -86,4 +99,6 @@ jobs:
           tag_name: v${{ steps.version.outputs.version }}
           name: v${{ steps.version.outputs.version }}
           target_commitish: ${{ github.sha }}
-          files: ${{ steps.release_artifact.outputs.artifact_name }}.zip
+          files: |
+            ${{ steps.release_artifact.outputs.artifact_name }}-linux.zip
+            ${{ steps.release_artifact.outputs.artifact_name }}-windows.zip
