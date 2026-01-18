@@ -1,5 +1,7 @@
 # TranslateUI
 
+🇬🇧 English | 🇷🇺 [Русский](README.RU.md)
+
 A minimalistic desktop translator built on **Ollama** + **TranslateGemma**.  
 Target stack: **.NET 10**, **C# 14**, **Avalonia UI**, **MVVM**. No paid libraries.
 
@@ -23,6 +25,17 @@ Target stack: **.NET 10**, **C# 14**, **Avalonia UI**, **MVVM**. No paid librari
 - **Close behavior**: confirm close, minimize to tray, or exit with “don’t ask again”.
 - **Debug logging**: configurable log level and log path in settings.
 - **Version**: displayed in settings and set in CI on `releases/*.*.*` builds.
+
+## How to Use
+- Launch the app and pick source/target languages.
+- **Text** tab: type or paste text, then press the translate button (▶).
+- **File** tab: choose or drag&drop a supported file, pick output path, then translate.
+- **Image** tab: available only with vision-capable models; select an image to translate.
+- **Tray > Translate**: translates clipboard content (text, image, or file) and opens the right tab.
+- **Settings**: configure UI language, default model, logging, and close behavior.
+
+## Releases
+- Download prebuilt binaries from GitHub Releases: https://github.com/somadhy/TranslateUI/releases
 
 ## Requirements Snapshot
 - **Supported formats**: PDF, TXT, MD, DOCX, ODT, PNG, JPEG, TIFF.
