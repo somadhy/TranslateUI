@@ -150,9 +150,10 @@
                                 <KeyBinding Gesture="Cmd+Enter" Command="{Binding TranslateCommand}" />
                             </TextBox.KeyBindings>
                         </TextBox>
-                        <Button Content=">"
+                        <Button Content="▶"
                                 Width="36"
                                 Height="32"
+                                FontSize="16"
                                 HorizontalAlignment="Right"
                                 VerticalAlignment="Bottom"
                                 Margin="8"
