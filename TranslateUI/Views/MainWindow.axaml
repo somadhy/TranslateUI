@@ -125,7 +125,7 @@
                        IsVisible="{Binding IsModelMissing}" />
         </StackPanel>
 
-            <TabControl Grid.Row="2">
+            <TabControl Grid.Row="2" SelectedIndex="{Binding SelectedTabIndex}">
             <TabItem Header="{DynamicResource TextTabHeader}"
                      ToolTip.Tip="{DynamicResource TooltipTextTab}">
                 <Grid RowDefinitions="Auto,*,Auto" ColumnDefinitions="*,*" ColumnSpacing="16" RowSpacing="8">

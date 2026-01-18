@@ -79,6 +79,7 @@
   <x:String x:Key="ErrorImageNotSelected">Select an image to translate.</x:String>
   <x:String x:Key="ErrorImageNotFound">Image file not found.</x:String>
   <x:String x:Key="ErrorImageTranslationFailed">Image translation failed.</x:String>
+  <x:String x:Key="ErrorVisionNotSupported">Selected model does not support image translation.</x:String>
   <x:String x:Key="ImageTranslationSuccess">Image translated successfully.</x:String>
   <x:String x:Key="TranslationSuccess">Translation completed. You can save the result.</x:String>
   <x:String x:Key="ResultSaved">Result saved.</x:String>

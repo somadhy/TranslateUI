@@ -7,7 +7,9 @@ using System.Linq;
 using System.Diagnostics;
 using System.IO;
 using System.Threading.Tasks;
+using Avalonia.Media.Imaging;
 using Avalonia.Threading;
+using Avalonia.Platform.Storage;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Microsoft.Extensions.Logging;
@@ -168,6 +170,9 @@ public partial class MainWindowViewModel : ViewModelBase
     [ObservableProperty]
     private bool isModelDownloading;
 
+    [ObservableProperty]
+    private int selectedTabIndex;
+
     private readonly string[] _modelOptions =
     {
         "translategemma:4b",
@@ -178,6 +183,84 @@ public partial class MainWindowViewModel : ViewModelBase
     private readonly List<LanguageInfo> _allLanguages;
 
     public string SelectedModelName => GetSelectedModelName();
+
+    public async Task TranslateFromClipboardAsync()
+    {
+        if (IsBusy)
+        {
+            return;
+        }
+
+        ErrorMessageKey = null;
+        StatusMessageKey = null;
+
+        using var clipboardImage = await _clipboardService.GetImageAsync();
+        if (clipboardImage is not null)
+        {
+            if (!IsVisionSupported)
+            {
+                ErrorMessageKey = "ErrorVisionNotSupported";
+                return;
+            }
+
+            SelectedTabIndex = 2;
+            var imagePath = await SaveClipboardImageAsync(clipboardImage);
+            if (string.IsNullOrWhiteSpace(imagePath))
+            {
+                ErrorMessageKey = "ErrorImageNotSelected";
+                return;
+            }
+
+            ImageFilePath = imagePath;
+            if (TranslateImageCommand.CanExecute(null))
+            {
+                await TranslateImageCommand.ExecuteAsync(null);
+            }
+
+            return;
+        }
+
+        var files = await _clipboardService.GetFilesAsync();
+        var supportedFile = FindSupportedClipboardFile(files);
+        if (!string.IsNullOrWhiteSpace(supportedFile))
+        {
+            SelectedTabIndex = 1;
+            InputFilePath = supportedFile;
+            var outputPath = await _fileDialogService.SaveFileAsync(BuildDefaultOutputPath(supportedFile));
+            if (string.IsNullOrWhiteSpace(outputPath))
+            {
+                return;
+            }
+
+            OutputFilePath = outputPath;
+            if (TranslateFileCommand.CanExecute(null))
+            {
+                await TranslateFileCommand.ExecuteAsync(null);
+            }
+
+            return;
+        }
+        else if (files is { Count: > 0 })
+        {
+            ErrorMessageKey = "ErrorFileUnsupported";
+            return;
+        }
+
+        var text = await _clipboardService.GetTextAsync();
+        if (!string.IsNullOrWhiteSpace(text))
+        {
+            SelectedTabIndex = 0;
+            SourceText = text;
+            if (TranslateCommand.CanExecute(null))
+            {
+                await TranslateCommand.ExecuteAsync(null);
+            }
+
+            return;
+        }
+
+        ErrorMessageKey = "ErrorEmptySource";
+    }
 
     public void SetInputFilePathFromUi(string path)
     {
@@ -491,6 +574,57 @@ public partial class MainWindowViewModel : ViewModelBase
         }
 
         await RefreshModelAvailabilityAsync();
+    }
+
+    private static async Task<string?> SaveClipboardImageAsync(Bitmap image)
+    {
+        try
+        {
+            var directory = Path.Combine(Path.GetTempPath(), "TranslateUI");
+            Directory.CreateDirectory(directory);
+            var filePath = Path.Combine(directory, $"clipboard-{Guid.NewGuid():N}.png");
+            await using var stream = File.Open(filePath, FileMode.Create, FileAccess.Write, FileShare.None);
+            image.Save(stream);
+            return filePath;
+        }
+        catch
+        {
+            return null;
+        }
+    }
+
+    private static string? FindSupportedClipboardFile(IReadOnlyList<IStorageItem>? items)
+    {
+        if (items is null || items.Count == 0)
+        {
+            return null;
+        }
+
+        foreach (var item in items)
+        {
+            var path = item.Path.LocalPath;
+            if (string.IsNullOrWhiteSpace(path))
+            {
+                continue;
+            }
+
+            if (IsSupportedFileExtension(path))
+            {
+                return path;
+            }
+        }
+
+        return null;
+    }
+
+    private static bool IsSupportedFileExtension(string path)
+    {
+        var extension = Path.GetExtension(path);
+        return extension.Equals(".txt", StringComparison.OrdinalIgnoreCase) ||
+               extension.Equals(".md", StringComparison.OrdinalIgnoreCase) ||
+               extension.Equals(".pdf", StringComparison.OrdinalIgnoreCase) ||
+               extension.Equals(".docx", StringComparison.OrdinalIgnoreCase) ||
+               extension.Equals(".odt", StringComparison.OrdinalIgnoreCase);
     }
 
     private static string BuildDefaultOutputPath(string inputPath)

@@ -1,4 +1,6 @@
 using System;
+using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.IO.Pipes;
 using System.Net.Http;
@@ -78,7 +80,7 @@ public partial class App : Application
         openItem.Click += (_, _) => ShowMainWindow(mainWindow);
 
         var translateItem = new NativeMenuItem("Translate");
-        translateItem.Click += (_, _) => TriggerTranslate(mainWindow);
+        translateItem.Click += async (_, _) => await TriggerTranslateAsync(mainWindow);
 
         var exitItem = new NativeMenuItem("Exit");
         exitItem.Click += (_, _) =>
@@ -91,6 +93,7 @@ public partial class App : Application
         menu.Items.Add(translateItem);
         menu.Items.Add(new NativeMenuItemSeparator());
         menu.Items.Add(exitItem);
+        menu.Opening += async (_, _) => translateItem.IsEnabled = await HasClipboardContentAsync();
 
         var trayIconStream = AssetLoader.Open(new Uri("avares://TranslateUI/Assets/avalonia-logo.ico"));
         _trayIcon = new TrayIcon
@@ -175,17 +178,63 @@ public partial class App : Application
         mainWindow.Activate();
     }
 
-    private static void TriggerTranslate(Window mainWindow)
+    private static async Task TriggerTranslateAsync(Window mainWindow)
     {
         if (mainWindow.DataContext is not MainWindowViewModel viewModel)
         {
             return;
         }
 
-        if (viewModel.TranslateCommand.CanExecute(null))
+        ShowMainWindow(mainWindow);
+        await viewModel.TranslateFromClipboardAsync();
+    }
+
+    private async Task<bool> HasClipboardContentAsync()
+    {
+        var clipboardService = Services.GetRequiredService<IClipboardService>();
+        using var image = await clipboardService.GetImageAsync();
+        if (image is not null)
         {
-            viewModel.TranslateCommand.Execute(null);
+            return true;
         }
+
+        var files = await clipboardService.GetFilesAsync();
+        if (HasSupportedClipboardFile(files))
+        {
+            return true;
+        }
+
+        var text = await clipboardService.GetTextAsync();
+        return !string.IsNullOrWhiteSpace(text);
+    }
+
+    private static bool HasSupportedClipboardFile(IReadOnlyList<Avalonia.Platform.Storage.IStorageItem>? items)
+    {
+        if (items is null || items.Count == 0)
+        {
+            return false;
+        }
+
+        foreach (var item in items)
+        {
+            var path = item.Path.LocalPath;
+            if (string.IsNullOrWhiteSpace(path))
+            {
+                continue;
+            }
+
+            var extension = Path.GetExtension(path);
+            if (extension.Equals(".txt", StringComparison.OrdinalIgnoreCase) ||
+                extension.Equals(".md", StringComparison.OrdinalIgnoreCase) ||
+                extension.Equals(".pdf", StringComparison.OrdinalIgnoreCase) ||
+                extension.Equals(".docx", StringComparison.OrdinalIgnoreCase) ||
+                extension.Equals(".odt", StringComparison.OrdinalIgnoreCase))
+            {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     private void StartActivationListener(Window mainWindow)
