@@ -99,6 +99,7 @@ public partial class App : Application
             ToolTipText = "TranslateUI",
             Menu = menu
         };
+        _trayIcon.Clicked += (_, _) => ShowMainWindow(mainWindow);
 
         mainWindow.Closing += async (_, args) =>
         {
