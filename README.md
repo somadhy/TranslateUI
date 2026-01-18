@@ -3,6 +3,8 @@
 A minimalistic desktop translator built on **Ollama** + **TranslateGemma**.  
 Target stack: **.NET 10**, **C# 14**, **Avalonia UI**, **MVVM**. No paid libraries.
 
+![TranslateUI screenshot](docs/translate-text.png)
+
 ## Goals
 - Translate text, files, and (optionally) images.
 - Provide strict aesthetic UI with adaptive layout and tray support.
@@ -16,13 +18,16 @@ Target stack: **.NET 10**, **C# 14**, **Avalonia UI**, **MVVM**. No paid librari
 - **Model selection**: discrete slider (4B, 12B, 27B) with “Speed → Accuracy”.
 - **Model download**: warning if missing, direct download or auto-download before translate.
 - **Clipboard**: paste source, copy/save result.
-- **Tray**: closing hides to tray; menu: Open/Translate/Exit.
+- **Tray**: left-click opens the app; menu: Open/Translate/Exit.
+- **Tray translate**: translates clipboard text, image, or file into the right tab.
+- **Close behavior**: confirm close, minimize to tray, or exit with “don’t ask again”.
 - **Debug logging**: configurable log level and log path in settings.
 - **Version**: displayed in settings and set in CI on `releases/*.*.*` builds.
 
 ## Requirements Snapshot
 - **Supported formats**: PDF, TXT, MD, DOCX, ODT, PNG, JPEG, TIFF.
 - **Settings**: default languages, Ollama URL, default model, UI language.
+- **Exit behavior**: choose close confirmation and action (exit/minimize to tray).
 - **Logging**: configurable log level (Debug/Info/Warn/Error/Off).
 - **Security**: safe file access, no arbitrary execution, sanitize paths.
 
