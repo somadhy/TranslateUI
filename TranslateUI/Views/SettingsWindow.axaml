@@ -23,6 +23,20 @@
                                 </DataTemplate>
                             </ComboBox.ItemTemplate>
                         </ComboBox>
+
+                        <TextBlock Text="{DynamicResource CloseBehaviorLabel}" />
+                        <ComboBox ItemsSource="{Binding CloseBehaviorOptions}"
+                                  SelectedItem="{Binding SelectedCloseBehavior}"
+                                  Width="220">
+                            <ComboBox.ItemTemplate>
+                                <DataTemplate>
+                                    <TextBlock Text="{Binding ResourceKey, Converter={StaticResource ResourceKeyToStringConverter}}" />
+                                </DataTemplate>
+                            </ComboBox.ItemTemplate>
+                        </ComboBox>
+
+                        <CheckBox Content="{DynamicResource CloseBehaviorPromptLabel}"
+                                  IsChecked="{Binding ShowCloseConfirmation}" />
                     </StackPanel>
                 </Border>
             </StackPanel>

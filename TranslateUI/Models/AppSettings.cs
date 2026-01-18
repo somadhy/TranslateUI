@@ -13,4 +13,6 @@ public sealed class AppSettings
     public LogLevel LogLevel { get; set; } = LogLevel.Error;
     public string LogFilePath { get; set; } = string.Empty;
     public Dictionary<string, int>? LanguageUsageCounts { get; set; } = new();
+    public bool ShowCloseConfirmation { get; set; } = true;
+    public CloseBehavior CloseBehavior { get; set; } = CloseBehavior.MinimizeToTray;
 }

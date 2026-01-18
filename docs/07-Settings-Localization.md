@@ -9,6 +9,8 @@
   - `OllamaUrl`
   - `DefaultModel`
   - `LogLevel` (Off/Debug/Info/Warn/Error)
+- `ShowCloseConfirmation` (true/false)
+- `CloseBehavior` (Exit/MinimizeToTray)
 
 ## 2. Сервис настроек
 - `ISettingsService`:

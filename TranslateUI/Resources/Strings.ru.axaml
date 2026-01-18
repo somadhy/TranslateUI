@@ -45,6 +45,16 @@
   <x:String x:Key="DefaultModelLabel">Модель по умолчанию</x:String>
   <x:String x:Key="DefaultSourceLanguageLabel">Язык источника по умолчанию</x:String>
   <x:String x:Key="DefaultTargetLanguageLabel">Язык назначения по умолчанию</x:String>
+  <x:String x:Key="CloseBehaviorLabel">Поведение при закрытии</x:String>
+  <x:String x:Key="CloseBehaviorPromptLabel">Показывать диалог при закрытии</x:String>
+  <x:String x:Key="CloseBehaviorExitOption">Закрыть приложение</x:String>
+  <x:String x:Key="CloseBehaviorMinimizeOption">Свернуть в трей</x:String>
+  <x:String x:Key="CloseDialogTitle">Закрытие приложения</x:String>
+  <x:String x:Key="CloseDialogMessage">Что сделать при закрытии окна?</x:String>
+  <x:String x:Key="CloseDialogDontShowAgain">Больше не показывать</x:String>
+  <x:String x:Key="CloseDialogExitButton">Закрыть</x:String>
+  <x:String x:Key="CloseDialogMinimizeButton">Свернуть в трей</x:String>
+  <x:String x:Key="CancelButton">Отмена</x:String>
   <x:String x:Key="LogLevelDebug">Отладка</x:String>
   <x:String x:Key="LogLevelInfo">Информация</x:String>
   <x:String x:Key="LogLevelWarn">Предупреждения</x:String>

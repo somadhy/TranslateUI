@@ -68,6 +68,14 @@ public partial class SettingsWindowViewModel : ViewModelBase
 
         OllamaUrl = _settingsService.Current.OllamaUrl;
         AppVersion = GetAppVersion();
+
+        CloseBehaviorOptions = new ObservableCollection<CloseBehaviorOption>
+        {
+            new(CloseBehavior.Exit, "CloseBehaviorExitOption"),
+            new(CloseBehavior.MinimizeToTray, "CloseBehaviorMinimizeOption")
+        };
+        SelectedCloseBehavior = FindCloseBehavior(_settingsService.Current.CloseBehavior);
+        ShowCloseConfirmation = _settingsService.Current.ShowCloseConfirmation;
     }
 
     public ObservableCollection<LogLevelOption> LogLevels { get; }
@@ -77,6 +85,8 @@ public partial class SettingsWindowViewModel : ViewModelBase
     public ObservableCollection<LanguageOption> UiLanguages { get; }
 
     public ObservableCollection<string> ModelOptions { get; }
+
+    public ObservableCollection<CloseBehaviorOption> CloseBehaviorOptions { get; }
 
     public string AppVersion { get; }
 
@@ -100,6 +110,12 @@ public partial class SettingsWindowViewModel : ViewModelBase
 
     [ObservableProperty]
     private string ollamaUrl = string.Empty;
+
+    [ObservableProperty]
+    private CloseBehaviorOption selectedCloseBehavior;
+
+    [ObservableProperty]
+    private bool showCloseConfirmation;
 
     public IRelayCommand OpenLogFileCommand { get; }
 
@@ -182,6 +198,23 @@ public partial class SettingsWindowViewModel : ViewModelBase
         _settingsService.Save();
     }
 
+    partial void OnSelectedCloseBehaviorChanged(CloseBehaviorOption value)
+    {
+        if (value is null)
+        {
+            return;
+        }
+
+        _settingsService.Current.CloseBehavior = value.Value;
+        _settingsService.Save();
+    }
+
+    partial void OnShowCloseConfirmationChanged(bool value)
+    {
+        _settingsService.Current.ShowCloseConfirmation = value;
+        _settingsService.Save();
+    }
+
     private void OpenLogFile()
     {
         var path = _loggingService.GetLatestLogFilePath();
@@ -214,6 +247,19 @@ public partial class SettingsWindowViewModel : ViewModelBase
         }
 
         return LogLevels[0];
+    }
+
+    private CloseBehaviorOption FindCloseBehavior(CloseBehavior behavior)
+    {
+        foreach (var option in CloseBehaviorOptions)
+        {
+            if (option.Value == behavior)
+            {
+                return option;
+            }
+        }
+
+        return CloseBehaviorOptions[0];
     }
 
     private LanguageInfo? FindLanguage(string code) =>

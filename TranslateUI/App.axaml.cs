@@ -15,6 +15,7 @@ using Avalonia.Threading;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Serilog.Extensions.Logging;
+using TranslateUI.Models;
 using TranslateUI.Services;
 using TranslateUI.ViewModels;
 using TranslateUI.Views;
@@ -28,6 +29,7 @@ public partial class App : Application
     private bool _isExitRequested;
     private CancellationTokenSource? _activationCts;
     private ILogger<App>? _logger;
+    private ISettingsService? _settingsService;
 
     public override void Initialize()
     {
@@ -52,6 +54,7 @@ public partial class App : Application
             loggingService.SetMinimumLevel(settings.LogLevel);
             logger.LogInformation("Application starting");
             RegisterUnhandledExceptionLogging(logger);
+            _settingsService = settingsService;
 
             var localization = Services.GetRequiredService<ILocalizationService>();
             localization.SetLanguage(settings.UiLanguage);
@@ -97,7 +100,7 @@ public partial class App : Application
             Menu = menu
         };
 
-        mainWindow.Closing += (_, args) =>
+        mainWindow.Closing += async (_, args) =>
         {
             if (_isExitRequested)
             {
@@ -106,8 +109,54 @@ public partial class App : Application
             }
 
             args.Cancel = true;
-            mainWindow.Hide();
+            await HandleCloseRequestAsync(desktop, mainWindow);
         };
+    }
+
+    private async Task HandleCloseRequestAsync(IClassicDesktopStyleApplicationLifetime desktop, Window mainWindow)
+    {
+        var settingsService = _settingsService;
+        if (settingsService is null)
+        {
+            mainWindow.Hide();
+            return;
+        }
+
+        var settings = settingsService.Current;
+        if (!settings.ShowCloseConfirmation)
+        {
+            ApplyCloseBehavior(desktop, mainWindow, settings.CloseBehavior);
+            return;
+        }
+
+        var dialog = Services.GetRequiredService<CloseBehaviorDialog>();
+        dialog.DataContext = Services.GetRequiredService<CloseBehaviorDialogViewModel>();
+        var decision = await dialog.ShowDialog<CloseBehaviorDecision?>(mainWindow);
+        if (decision is null)
+        {
+            return;
+        }
+
+        settings.CloseBehavior = decision.Behavior;
+        if (decision.DontShowAgain)
+        {
+            settings.ShowCloseConfirmation = false;
+        }
+        settingsService.Save();
+        ApplyCloseBehavior(desktop, mainWindow, decision.Behavior);
+    }
+
+    private void ApplyCloseBehavior(IClassicDesktopStyleApplicationLifetime desktop, Window mainWindow, CloseBehavior behavior)
+    {
+        if (behavior == CloseBehavior.Exit)
+        {
+            _isExitRequested = true;
+            desktop.Shutdown();
+        }
+        else
+        {
+            mainWindow.Hide();
+        }
     }
 
     internal static void ShowMainWindow(Window mainWindow)
@@ -244,6 +293,8 @@ public partial class App : Application
         services.AddSingleton<IImageTranslationService, ImageTranslationService>();
         services.AddSingleton<MainWindow>();
         services.AddSingleton<MainWindowViewModel>();
+        services.AddTransient<CloseBehaviorDialog>();
+        services.AddTransient<CloseBehaviorDialogViewModel>();
         services.AddTransient<SettingsWindow>();
         services.AddTransient<SettingsWindowViewModel>();
         return services.BuildServiceProvider();

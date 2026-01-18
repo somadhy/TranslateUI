@@ -45,6 +45,16 @@
   <x:String x:Key="DefaultModelLabel">Default model</x:String>
   <x:String x:Key="DefaultSourceLanguageLabel">Default source language</x:String>
   <x:String x:Key="DefaultTargetLanguageLabel">Default target language</x:String>
+  <x:String x:Key="CloseBehaviorLabel">Close behavior</x:String>
+  <x:String x:Key="CloseBehaviorPromptLabel">Ask on close</x:String>
+  <x:String x:Key="CloseBehaviorExitOption">Exit application</x:String>
+  <x:String x:Key="CloseBehaviorMinimizeOption">Minimize to tray</x:String>
+  <x:String x:Key="CloseDialogTitle">Close application</x:String>
+  <x:String x:Key="CloseDialogMessage">What should happen when you close the window?</x:String>
+  <x:String x:Key="CloseDialogDontShowAgain">Don't show again</x:String>
+  <x:String x:Key="CloseDialogExitButton">Exit</x:String>
+  <x:String x:Key="CloseDialogMinimizeButton">Minimize to tray</x:String>
+  <x:String x:Key="CancelButton">Cancel</x:String>
   <x:String x:Key="LogLevelDebug">Debug</x:String>
   <x:String x:Key="LogLevelInfo">Info</x:String>
   <x:String x:Key="LogLevelWarn">Warn</x:String>

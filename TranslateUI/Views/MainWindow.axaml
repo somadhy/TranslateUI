@@ -18,11 +18,7 @@
 
     <Grid>
         <Grid RowDefinitions="Auto,Auto,*" Margin="16" IsEnabled="{Binding IsNotBusy}">
-            <Grid ColumnDefinitions="Auto,Auto,Auto,Auto,*" ColumnSpacing="12">
-            <Button Content="{DynamicResource SettingsButton}"
-                    Width="140"
-                    ToolTip.Tip="{DynamicResource TooltipSettings}"
-                    Click="OnOpenSettingsClicked" />
+            <Grid ColumnDefinitions="Auto,Auto,Auto,Auto,*,Auto" ColumnSpacing="12">
 
             <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
                 <TextBlock Text="{DynamicResource SourceLanguageLabel}"
@@ -106,6 +102,15 @@
                                  Value="{Binding ModelDownloadProgress}" />
                 </StackPanel>
             </StackPanel>
+
+            <Button Grid.Column="5"
+                    Content="⚙"
+                    Width="32"
+                    Height="32"
+                    FontSize="16"
+                    HorizontalAlignment="Right"
+                    ToolTip.Tip="{DynamicResource TooltipSettings}"
+                    Click="OnOpenSettingsClicked" />
             </Grid>
 
             <StackPanel Grid.Row="1" Spacing="4">
