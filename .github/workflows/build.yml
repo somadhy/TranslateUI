@@ -1,11 +1,14 @@
 name: build
 
+permissions:
+  contents: write
+
 on:
   push:
     branches:
       - "main"
       - "dev"
-      - "release/*"
+      - "releases/*"
   pull_request:
 
 jobs:
@@ -20,14 +23,16 @@ jobs:
         with:
           dotnet-version: "10.0.x"
 
-      - name: Set version from release branch
+      - name: Set version from releases branch
         id: version
         shell: bash
         run: |
           BRANCH="${GITHUB_REF_NAME}"
-          if [[ "$BRANCH" == release/v* ]]; then
-            VERSION="${BRANCH#release/v}"
+          IS_RELEASE_BRANCH=false
+          if [[ "$BRANCH" =~ ^releases/v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            VERSION="${BRANCH#releases/v}"
             BASE_VERSION="$VERSION"
+            IS_RELEASE_BRANCH=true
           elif [[ "$BRANCH" == "main" ]]; then
             VERSION="0.0.0-main"
             BASE_VERSION="0.0.0"
@@ -40,14 +45,45 @@ jobs:
           fi
           echo "version=$VERSION" >> "$GITHUB_OUTPUT"
           echo "assembly_version=${BASE_VERSION}.0" >> "$GITHUB_OUTPUT"
+          echo "is_release_branch=$IS_RELEASE_BRANCH" >> "$GITHUB_OUTPUT"
 
       - name: Build
         run: |
-          dotnet build -c Release \
+          dotnet build -c release \
             -p:Version=${{ steps.version.outputs.version }} \
             -p:InformationalVersion=${{ steps.version.outputs.version }} \
             -p:AssemblyVersion=${{ steps.version.outputs.assembly_version }} \
             -p:FileVersion=${{ steps.version.outputs.assembly_version }}
 
       - name: Test
-        run: dotnet test TranslateUI.Tests/TranslateUI.Tests.csproj -c Release
+        run: dotnet test TranslateUI.Tests/TranslateUI.Tests.csproj -c release
+
+      - name: Publish
+        if: steps.version.outputs.is_release_branch == 'true'
+        run: dotnet publish TranslateUI/TranslateUI.csproj -c release -o publish
+
+      - name: Package release artifact
+        id: release_artifact
+        if: steps.version.outputs.is_release_branch == 'true'
+        shell: bash
+        run: |
+          ARTIFACT_NAME="TranslateUI-${{ steps.version.outputs.version }}"
+          echo "artifact_name=$ARTIFACT_NAME" >> "$GITHUB_OUTPUT"
+          cd publish
+          zip -r "../${ARTIFACT_NAME}.zip" .
+
+      - name: Upload release artifact
+        if: steps.version.outputs.is_release_branch == 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ steps.release_artifact.outputs.artifact_name }}
+          path: ${{ steps.release_artifact.outputs.artifact_name }}.zip
+
+      - name: Publish GitHub release
+        if: steps.version.outputs.is_release_branch == 'true'
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v${{ steps.version.outputs.version }}
+          name: v${{ steps.version.outputs.version }}
+          target_commitish: ${{ github.sha }}
+          files: ${{ steps.release_artifact.outputs.artifact_name }}.zip

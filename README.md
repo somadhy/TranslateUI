@@ -18,7 +18,7 @@ Target stack: **.NET 10**, **C# 14**, **Avalonia UI**, **MVVM**. No paid librari
 - **Clipboard**: paste source, copy/save result.
 - **Tray**: closing hides to tray; menu: Open/Translate/Exit.
 - **Debug logging**: configurable log level and log path in settings.
-- **Version**: displayed in settings and set in CI on `release/*.*.*` builds.
+- **Version**: displayed in settings and set in CI on `releases/*.*.*` builds.
 
 ## Requirements Snapshot
 - **Supported formats**: PDF, TXT, MD, DOCX, ODT, PNG, JPEG, TIFF.
